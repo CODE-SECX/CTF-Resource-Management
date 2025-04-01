@@ -1,0 +1,115 @@
+{
+    "resources": [
+        {
+            "id": 1,
+            "name": "Burp Suite",
+            "category": "web",
+            "tags": [
+                "web",
+                "proxy",
+                "pentesting",
+                "http",
+                "https"
+            ],
+            "description": "An integrated platform for performing security testing of web applications. Features include:\n\n- Intercepting proxy\n- Web vulnerability scanner\n- Intruder tool\n- Repeater tool\n- Sequencer tool\n- Decoder tool\n- Comparer tool\n- Extender tool",
+            "url": "https://portswigger.net/burp",
+            "date_added": "2023-01-01T00:00:00",
+            "added_by": "admin",
+            "rating": 4.8,
+            "ratings_count": 150
+        },
+        {
+            "id": 2,
+            "name": "Ghidra",
+            "category": "rev",
+            "tags": [
+                "reverse-engineering",
+                "decompiler",
+                "disassembler",
+                "java"
+            ],
+            "description": "Ghidra is a software reverse engineering (SRE) suite of tools developed by NSA's Research Center in support of the Cybersecurity mission.\n\nKey features:\n- Decompiler\n- Disassembler\n- Scripting\n- Graph visualization\n- Version control integration",
+            "url": "https://ghidra-sre.org/",
+            "date_added": "2023-01-02T00:00:00",
+            "added_by": "admin",
+            "rating": 4.590163934426229,
+            "ratings_count": 122
+        },
+        {
+            "id": 3,
+            "name": "John the Ripper",
+            "category": "crypto",
+            "tags": [
+                "password-cracking",
+                "hash-cracking",
+                "brute-force",
+                "wordlist"
+            ],
+            "description": "John the Ripper is a fast password cracker, currently available for many flavors of Unix, Windows, DOS, BeOS, and OpenVMS.\n\nFeatures:\n- Multiple hash types support\n- Wordlist-based cracking\n- Rule-based cracking\n- Incremental mode\n- Distributed cracking",
+            "url": "https://www.openwall.com/john/",
+            "date_added": "2023-01-03T00:00:00",
+            "added_by": "admin",
+            "rating": 4.7,
+            "ratings_count": 90
+        },
+        {
+            "id": 4,
+            "name": "Volatility",
+            "category": "forensics",
+            "tags": [
+                "memory-analysis",
+                "forensics",
+                "windows",
+                "linux",
+                "macos"
+            ],
+            "description": "Volatility is the world's most widely used framework for extracting digital artifacts from volatile memory (RAM) samples.\n\nCapabilities:\n- Process listing\n- Network connections\n- Registry analysis\n- File system analysis\n- Malware detection",
+            "url": "https://www.volatilityfoundation.org/",
+            "date_added": "2023-01-04T00:00:00",
+            "added_by": "admin",
+            "rating": 4.5,
+            "ratings_count": 75
+        },
+        {
+            "id": 5,
+            "name": "ROPgadget",
+            "category": "pwn",
+            "tags": [
+                "rop",
+                "binary-exploitation",
+                "gadgets",
+                "x86",
+                "x64",
+                "arm"
+            ],
+            "description": "ROPgadget is a tool that lets you search for gadgets in binaries to facilitate ROP exploitation.\n\nFeatures:\n- Gadget search\n- Binary analysis\n- Multiple architecture support\n- Gadget classification\n- ROP chain generation",
+            "url": "https://github.com/JonathanSalwan/ROPgadget",
+            "date_added": "2023-01-05T00:00:00",
+            "added_by": "admin",
+            "rating": 4.4,
+            "ratings_count": 60
+        },
+        {
+            "name": "a",
+            "category": "rev",
+            "tags": [
+                "asd"
+            ],
+            "description": "asdasd",
+            "url": "https://ldce.ac.in",
+            "id": 6,
+            "date_added": "2025-04-01T22:07:40.576028",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0
+        }
+    ],
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "password_hash": "pbkdf2:sha256:260000$YOUR_HASH_HERE"
+        }
+    ],
+    "favorites": {}
+}

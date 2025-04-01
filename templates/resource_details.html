@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">{{ resource.name }}</h1>
+            <div>
+                <button class="btn btn-outline-warning" onclick="toggleFavorite({{ resource.id }})">
+                    <i class="fas fa-star"></i> Favorite
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Resource Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title">{{ resource.name }}</h4>
+                            <div class="mb-3">
+                                <span class="badge bg-primary category-badge">{{ resource.category }}</span>
+                                {% if resource.is_new %}
+                                <span class="badge bg-success">New</span>
+                                {% endif %}
+                                {% if resource.rating >= 4.5 %}
+                                <span class="badge bg-warning text-dark">Top Rated</span>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {% for tag in resource.tags %}
+                                <span class="tag">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="description markdown-content mb-4">
+                                {{ resource.description_html|safe }}
+                            </div>
+                            <div class="metadata">
+                                <p><strong>Added by:</strong> {{ resource.added_by }}</p>
+                                <p><strong>Date added:</strong> {{ resource.date_added.split('T')[0] }}</p>
+                                <p><strong>Views:</strong> {{ resource.views }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-star"></i> Rating</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="rating-section">
+                                <h3>Rate this resource</h3>
+                                <div class="rating-display mb-3">
+                                    Current rating: <span class="text-warning">{{ "%.1f"|format(resource.rating) }}</span>
+                                    ({{ resource.ratings_count }} ratings)
+                                </div>
+                                <div class="rating-input">
+                                    {% for i in range(5) %}
+                                    <i class="fas fa-star rating-star" 
+                                       data-rating="{{ i + 1 }}"
+                                       data-resource-id="{{ resource.id }}"
+                                       style="cursor: pointer; font-size: 1.5rem; margin-right: 0.5rem;"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-external-link-alt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="{{ resource.url }}" target="_blank" class="btn btn-primary w-100 mb-2">
+                                <i class="fas fa-external-link-alt me-2"></i> Visit Resource
+                            </a>
+                            <button class="btn btn-outline-warning w-100 favorite-btn" data-resource-id="{{ resource.id }}">
+                                <i class="fas fa-star me-2"></i> Favorite
+                            </button>
+                        </div>
+                    </div>
+
+                    {% if similar_resources %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-random"></i> Similar Resources</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for similar in similar_resources %}
+                            <div class="similar-resource mb-3">
+                                <a href="/resource/{{ similar.id }}" class="text-decoration-none">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">{{ similar.name }}</div>
+                                            <div class="small text-muted">
+                                                <span class="badge bg-secondary">{{ similar.category }}</span>
+                                                <span class="ms-2">
+                                                    <i class="fas fa-star text-warning"></i> {{ "%.1f"|format(similar.rating) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-muted"></i>
+                                    </div>
+                                </a>
+                            </div>
+                            {% if not loop.last %}
+                            <hr class="my-2">
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.similar-resource {
+    transition: transform 0.2s;
+}
+
+.similar-resource:hover {
+    transform: translateX(5px);
+}
+
+[data-theme="dark"] .similar-resource a {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .similar-resource .text-muted {
+    color: #a0a0a0 !important;
+}
+</style>
+
+<script>
+function toggleFavorite(resourceId) {
+    // Store favorite status in localStorage since we don't have user accounts
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const index = favorites.indexOf(resourceId);
+    
+    if (index === -1) {
+        favorites.push(resourceId);
+    } else {
+        favorites.splice(index, 1);
+    }
+    
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    
+    // Update UI
+    const button = document.querySelector('.btn-outline-warning');
+    if (favorites.includes(resourceId)) {
+        button.classList.add('active');
+        button.innerHTML = '<i class="fas fa-star"></i> Favorited';
+    } else {
+        button.classList.remove('active');
+        button.innerHTML = '<i class="fas fa-star"></i> Favorite';
+    }
+}
+
+function rateResource(resourceId, rating) {
+    fetch(`/api/resources/${resourceId}/rate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rating: rating })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reload page to show updated rating
+        window.location.reload();
+    });
+}
+
+// Check if resource is favorited on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const resourceId = {{ resource.id }};
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const button = document.querySelector('.btn-outline-warning');
+    
+    if (favorites.includes(resourceId)) {
+        button.classList.add('active');
+        button.innerHTML = '<i class="fas fa-star"></i> Favorited';
+    }
+});
+</script>
+{% endblock %} 
