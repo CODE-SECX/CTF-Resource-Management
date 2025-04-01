@@ -16,7 +16,9 @@
             "date_added": "2023-01-01T00:00:00",
             "added_by": "admin",
             "rating": 4.8,
-            "ratings_count": 150
+            "ratings_count": 150,
+            "description_html": "<p>An integrated platform for performing security testing of web applications. Features include:</p>\n<ul>\n<li>Intercepting proxy</li>\n<li>Web vulnerability scanner</li>\n<li>Intruder tool</li>\n<li>Repeater tool</li>\n<li>Sequencer tool</li>\n<li>Decoder tool</li>\n<li>Comparer tool</li>\n<li>Extender tool</li>\n</ul>",
+            "views": 4
         },
         {
             "id": 2,
@@ -33,7 +35,9 @@
             "date_added": "2023-01-02T00:00:00",
             "added_by": "admin",
             "rating": 4.590163934426229,
-            "ratings_count": 122
+            "ratings_count": 122,
+            "description_html": "<p>Ghidra is a software reverse engineering (SRE) suite of tools developed by NSA's Research Center in support of the Cybersecurity mission.</p>\n<p>Key features:\n- Decompiler\n- Disassembler\n- Scripting\n- Graph visualization\n- Version control integration</p>",
+            "views": 8
         },
         {
             "id": 3,
@@ -50,7 +54,9 @@
             "date_added": "2023-01-03T00:00:00",
             "added_by": "admin",
             "rating": 4.7,
-            "ratings_count": 90
+            "ratings_count": 90,
+            "description_html": "<p>John the Ripper is a fast password cracker, currently available for many flavors of Unix, Windows, DOS, BeOS, and OpenVMS.</p>\n<p>Features:\n- Multiple hash types support\n- Wordlist-based cracking\n- Rule-based cracking\n- Incremental mode\n- Distributed cracking</p>",
+            "views": 3
         },
         {
             "id": 4,
@@ -68,7 +74,9 @@
             "date_added": "2023-01-04T00:00:00",
             "added_by": "admin",
             "rating": 4.5,
-            "ratings_count": 75
+            "ratings_count": 75,
+            "description_html": "<p>Volatility is the world's most widely used framework for extracting digital artifacts from volatile memory (RAM) samples.</p>\n<p>Capabilities:\n- Process listing\n- Network connections\n- Registry analysis\n- File system analysis\n- Malware detection</p>",
+            "views": 1
         },
         {
             "id": 5,

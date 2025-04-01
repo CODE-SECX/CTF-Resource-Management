@@ -6,7 +6,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h1 class="h3 mb-0">{{ resource.name }}</h1>
             <div>
-                <button class="btn btn-outline-warning" onclick="toggleFavorite({{ resource.id }})">
+                <button class="btn btn-outline-warning favorite-btn" data-resource-id="{{ resource.id }}">
                     <i class="fas fa-star"></i> Favorite
                 </button>
             </div>
@@ -25,9 +25,6 @@
                                 {% if resource.is_new %}
                                 <span class="badge bg-success">New</span>
                                 {% endif %}
-                                {% if resource.rating >= 4.5 %}
-                                <span class="badge bg-warning text-dark">Top Rated</span>
-                                {% endif %}
                             </div>
                             <div class="mb-3">
                                 {% for tag in resource.tags %}
@@ -41,29 +38,6 @@
                                 <p><strong>Added by:</strong> {{ resource.added_by }}</p>
                                 <p><strong>Date added:</strong> {{ resource.date_added.split('T')[0] }}</p>
                                 <p><strong>Views:</strong> {{ resource.views }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-star"></i> Rating</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="rating-section">
-                                <h3>Rate this resource</h3>
-                                <div class="rating-display mb-3">
-                                    Current rating: <span class="text-warning">{{ "%.1f"|format(resource.rating) }}</span>
-                                    ({{ resource.ratings_count }} ratings)
-                                </div>
-                                <div class="rating-input">
-                                    {% for i in range(5) %}
-                                    <i class="fas fa-star rating-star" 
-                                       data-rating="{{ i + 1 }}"
-                                       data-resource-id="{{ resource.id }}"
-                                       style="cursor: pointer; font-size: 1.5rem; margin-right: 0.5rem;"></i>
-                                    {% endfor %}
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -98,9 +72,6 @@
                                             <div class="fw-bold">{{ similar.name }}</div>
                                             <div class="small text-muted">
                                                 <span class="badge bg-secondary">{{ similar.category }}</span>
-                                                <span class="ms-2">
-                                                    <i class="fas fa-star text-warning"></i> {{ "%.1f"|format(similar.rating) }}
-                                                </span>
                                             </div>
                                         </div>
                                         <i class="fas fa-chevron-right text-muted"></i>
@@ -139,55 +110,64 @@
 </style>
 
 <script>
-function toggleFavorite(resourceId) {
-    // Store favorite status in localStorage since we don't have user accounts
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const index = favorites.indexOf(resourceId);
-    
-    if (index === -1) {
-        favorites.push(resourceId);
-    } else {
-        favorites.splice(index, 1);
-    }
-    
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    
-    // Update UI
-    const button = document.querySelector('.btn-outline-warning');
-    if (favorites.includes(resourceId)) {
-        button.classList.add('active');
-        button.innerHTML = '<i class="fas fa-star"></i> Favorited';
-    } else {
-        button.classList.remove('active');
-        button.innerHTML = '<i class="fas fa-star"></i> Favorite';
-    }
-}
-
-function rateResource(resourceId, rating) {
-    fetch(`/api/resources/${resourceId}/rate`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ rating: rating })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Reload page to show updated rating
-        window.location.reload();
-    });
-}
-
-// Check if resource is favorited on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize favorite buttons
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
     const resourceId = {{ resource.id }};
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    const button = document.querySelector('.btn-outline-warning');
     
-    if (favorites.includes(resourceId)) {
-        button.classList.add('active');
-        button.innerHTML = '<i class="fas fa-star"></i> Favorited';
+    // Set initial state for all favorite buttons
+    function updateFavoriteButtons() {
+        const isFavorited = favorites.includes(resourceId);
+        favoriteButtons.forEach(button => {
+            if (isFavorited) {
+                button.classList.add('btn-warning');
+                button.classList.remove('btn-outline-warning');
+                button.innerHTML = '<i class="fas fa-star"></i> Favorited';
+            } else {
+                button.classList.remove('btn-warning');
+                button.classList.add('btn-outline-warning');
+                button.innerHTML = '<i class="fas fa-star"></i> Favorite';
+            }
+        });
     }
+    
+    // Initial state update
+    updateFavoriteButtons();
+    
+    // Add click handlers
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const isFavorite = this.classList.contains('btn-warning');
+            
+            // Update localStorage
+            if (isFavorite) {
+                const index = favorites.indexOf(resourceId);
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                }
+            } else {
+                favorites.push(resourceId);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            
+            // Update all favorite buttons
+            updateFavoriteButtons();
+            
+            // Show toast notification
+            const toast = document.createElement('div');
+            toast.className = 'toast success';
+            toast.innerHTML = isFavorite ? 'Resource removed from favorites' : 'Resource added to favorites';
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        });
+    });
 });
 </script>
 {% endblock %} 
