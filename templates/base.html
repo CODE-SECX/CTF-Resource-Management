@@ -100,7 +100,7 @@
         }
 
         .table tbody tr {
-            background-color: var(--card-bg);
+            background-color: var (--card-bg);
             transition: background-color 0.2s ease;
         }
 
@@ -540,7 +540,7 @@
         [data-theme="dark"] .search-box input {
             background-color: #2d2d2d;
             border-color: var(--border-color);
-            color: var(--text-color);
+            color: var (--text-color);
         }
 
         [data-theme="dark"] .search-suggestions {
@@ -674,10 +674,13 @@
                         <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-trophy"></i> Top Resources</a>
+                        <a class="nav-link" href="{{ url_for('favorites_page') }}"><i class="fas fa-star"></i> Favorites</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-book"></i> Guides</a>
+                        <a class="nav-link" href="{{ url_for('add_resource_page') }}"><i class="fas fa-plus-circle"></i> Add Resource</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('category_management') }}"><i class="fas fa-tags"></i> Categories</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">

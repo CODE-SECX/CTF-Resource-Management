@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-tags"></i> Category Management</h1>
+            <p class="lead">Manage the categories that users can assign to resources</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Categories</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Icon</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>
+                                        <i class="{{ category.icon }}"></i>
+                                        {{ category.name }}
+                                    </td>
+                                    <td><code>{{ category.slug }}</code></td>
+                                    <td><i class="{{ category.icon }}"></i> <small class="text-muted">{{ category.icon }}</small></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-category-btn" 
+                                                data-id="{{ category.id }}"
+                                                data-name="{{ category.name }}"
+                                                data-slug="{{ category.slug }}"
+                                                data-icon="{{ category.icon }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-category-btn" 
+                                                data-id="{{ category.id }}"
+                                                data-name="{{ category.name }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Add New Category</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="add-category-form">
+                        <input type="hidden" name="action" value="add">
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="form-text">Display name for the category</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Category Slug</label>
+                            <input type="text" class="form-control" id="slug" name="slug" pattern="[a-z0-9-]+" required>
+                            <div class="form-text">Short identifier used in URLs (lowercase, no spaces)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">Icon</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i id="icon-preview" class="fas fa-folder"></i></span>
+                                <input type="text" class="form-control" id="icon" name="icon" value="fas fa-folder">
+                            </div>
+                            <div class="form-text">
+                                Font Awesome icon class (see <a href="https://fontawesome.com/icons?d=gallery&m=free" target="_blank">available icons</a>)
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add Category
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="edit-category-form">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="category_id" id="edit-category-id">
+                    
+                    <div class="mb-3">
+                        <label for="edit-name" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="edit-name" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit-slug" class="form-label">Category Slug</label>
+                        <input type="text" class="form-control" id="edit-slug" name="slug" pattern="[a-z0-9-]+" required>
+                        <div class="form-text">Short identifier used in URLs (lowercase, no spaces)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit-icon" class="form-label">Icon</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i id="edit-icon-preview" class="fas fa-folder"></i></span>
+                            <input type="text" class="form-control" id="edit-icon" name="icon">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Category Modal -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCategoryModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the category "<span id="delete-category-name"></span>"?</p>
+                <p class="text-danger">This action cannot be undone!</p>
+                <p>Note: Categories that are in use by resources cannot be deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="category_id" id="delete-category-id">
+                    <button type="submit" class="btn btn-danger">Delete Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate slug from name
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+    
+    if (nameInput && slugInput) {
+        nameInput.addEventListener('input', function() {
+            // Convert to lowercase, replace spaces with hyphens, remove special chars
+            slugInput.value = this.value.toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with hyphens
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars except hyphens
+                .replace(/\-\-+/g, '-')         // Replace multiple hyphens with single hyphen
+                .replace(/^-+/, '')             // Trim hyphens from start
+                .replace(/-+$/, '');            // Trim hyphens from end
+        });
+    }
+    
+    // Icon preview
+    const iconInput = document.getElementById('icon');
+    const iconPreview = document.getElementById('icon-preview');
+    
+    if (iconInput && iconPreview) {
+        iconInput.addEventListener('input', function() {
+            // Update icon preview with new class
+            iconPreview.className = this.value;
+        });
+    }
+    
+    // Edit category
+    document.querySelectorAll('.edit-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            const slug = this.dataset.slug;
+            const icon = this.dataset.icon;
+            
+            // Populate modal fields
+            document.getElementById('edit-category-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-slug').value = slug;
+            document.getElementById('edit-icon').value = icon;
+            document.getElementById('edit-icon-preview').className = icon;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            modal.show();
+        });
+    });
+    
+    // Edit icon preview
+    const editIconInput = document.getElementById('edit-icon');
+    const editIconPreview = document.getElementById('edit-icon-preview');
+    
+    if (editIconInput && editIconPreview) {
+        editIconInput.addEventListener('input', function() {
+            // Update icon preview with new class
+            editIconPreview.className = this.value;
+        });
+    }
+    
+    // Delete category
+    document.querySelectorAll('.delete-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            
+            // Populate modal fields
+            document.getElementById('delete-category-id').value = id;
+            document.getElementById('delete-category-name').textContent = name;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
+            modal.show();
+        });
+    });
+});
+</script>
+{% endblock %}

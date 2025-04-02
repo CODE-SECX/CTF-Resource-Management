@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-edit"></i> Edit Resource</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('edit_resource', resource_id=resource.id) }}" enctype="multipart/form-data">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ resource.name }}" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="" disabled>Select a category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.slug }}" {% if resource.category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tags" class="form-label">Tags (comma separated)</label>
+                                <input type="text" class="form-control" id="tags" name="tags" placeholder="web, forensics, crypto" value="{{ resource.tags|join(', ') }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="url" class="form-label">URL (if applicable)</label>
+                                <input type="url" class="form-control" id="url" name="url" value="{{ resource.url }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 mt-2">
+                            <label for="description" class="form-label fw-bold">Resource Description</label>
+                            <p class="text-muted small mb-2">Use the rich text editor below to create detailed content with formatting, links, images, and more.</p>
+                            <div class="editor-container" style="min-height: 500px; border: 1px solid var(--border-color); border-radius: 4px;">
+                                <textarea id="description" name="description" style="min-height: 500px;">{{ resource.description }}</textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="file" class="form-label">Attachment (optional)</label>
+                            {% if resource.file_path %}
+                            <div class="mb-2">
+                                <span class="text-muted">Current file: </span>
+                                <a href="{{ url_for('static', filename=resource.file_path) }}" target="_blank">
+                                    {{ resource.file_path.split('_', 1)[1] }}
+                                </a>
+                                <span class="text-muted">(Upload a new file to replace)</span>
+                            </div>
+                            {% endif %}
+                            <input type="file" class="form-control" id="file" name="file">
+                        </div>
+                        
+                        <div class="text-end">
+                            <a href="{{ url_for('resource_details', resource_id=resource.id) }}" class="btn btn-secondary me-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Resource
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- TinyMCE CDN Script -->
+<script src="https://cdn.tiny.cloud/1/no17idvqooop2hz590huxkpthgsoutf3f5kb89qobgl0dkfl/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    // Initialize TinyMCE with theme-aware configuration
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to set editor theme based on site theme
+        function updateEditorTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            
+            // Initialize TinyMCE with appropriate theme
+            tinymce.init({
+                selector: '#description',
+                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                height: 600,
+                skin: currentTheme === 'dark' ? 'oxide-dark' : 'oxide',
+                content_css: currentTheme === 'dark' ? 'dark' : 'default',
+                entity_encoding: 'raw',
+                promotion: false,
+                branding: false,
+                resize: true,
+                statusbar: true,
+                menubar: 'file edit view insert format tools table help',
+                setup: function(editor) {
+                    // Save content to textarea on form submit
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        }
+        
+        // Initial setup
+        updateEditorTheme();
+        
+        // Update editor theme when site theme changes
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                // Wait for theme change to complete
+                setTimeout(function() {
+                    // Destroy existing editor
+                    tinymce.remove('#description');
+                    // Reinitialize with new theme
+                    updateEditorTheme();
+                }, 100);
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -73,37 +73,19 @@
                 </div>
             </div>
         </div>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-fire"></i> Trending</h5>
-            </div>
-            <div class="card-body">
-                <div id="trendingResources">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     
     <div class="col-md-9">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="mb-0"><i class="fas fa-database"></i> Resources</h4>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addResourceModal">
-                <i class="fas fa-plus"></i> Add Resource
-            </button>
         </div>
 
         <div id="resourceList">
             {% for resource in resources %}
-            <div class="card mb-4 fade-in resource-card" style="cursor: pointer;" onclick="window.location.href='/resource/{{ resource.id }}'">
+            <div class="card mb-4 fade-in resource-card" data-id="{{ resource.id }}" data-category="{{ resource.category }}" data-tags="{{ resource.tags|join(',') }}">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div>
+                        <div style="cursor: pointer;" onclick="window.location.href='/resource/{{ resource.id }}'">
                             <h5 class="card-title mb-2">{{ resource.name }}</h5>
                             <div class="mb-2">
                                 <span class="badge bg-primary category-badge">{{ resource.category }}</span>
@@ -129,9 +111,11 @@
                             </div>
                         </div>
                         <div class="ms-3 resource-actions">
-                            <a href="{{ resource.url }}" target="_blank" class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation();">
+                            {% if resource.url %}
+                            <a href="{{ resource.url }}" target="_blank" class="btn btn-outline-primary btn-sm mb-2" onclick="event.stopPropagation();">
                                 <i class="fas fa-external-link-alt"></i> Visit
                             </a>
+                            {% endif %}
                             <button class="btn btn-outline-warning btn-sm favorite-btn" data-resource-id="{{ resource.id }}" onclick="event.stopPropagation();">
                                 <i class="fas fa-star"></i> Favorite
                             </button>
@@ -144,67 +128,6 @@
     </div>
 </div>
 
-<!-- Resource Details Modal -->
-<div class="modal fade" id="resourceDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Resource Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="resourceDetails"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Resource Modal -->
-<div class="modal fade" id="addResourceModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Add New Resource</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addResourceForm">
-                    <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Category</label>
-                        <select class="form-select" name="category" required>
-                            <option value="web">Web Exploitation</option>
-                            <option value="crypto">Cryptography</option>
-                            <option value="rev">Reverse Engineering</option>
-                            <option value="pwn">Binary Exploitation</option>
-                            <option value="forensics">Forensics</option>
-                            <option value="misc">Miscellaneous</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tags (comma-separated)</label>
-                        <input type="text" class="form-control" name="tags" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description (Markdown supported)</label>
-                        <textarea class="form-control" name="description" rows="4" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">URL</label>
-                        <input type="url" class="form-control" name="url" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="submitResource">Add Resource</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
@@ -230,463 +153,172 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateStatistics();
 
+    // Get favorites from localStorage
+    function getFavorites() {
+        return JSON.parse(localStorage.getItem('favorites') || '[]');
+    }
+
+    // Save favorites to localStorage
+    function saveFavorites(favorites) {
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
+    // Update favorite button states
+    function updateFavoriteButtons() {
+        const favorites = getFavorites();
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            const resourceId = button.getAttribute('data-resource-id');
+            const isFavorited = favorites.includes(parseInt(resourceId));
+            
+            if (isFavorited) {
+                button.classList.add('btn-warning');
+                button.classList.remove('btn-outline-warning');
+                button.innerHTML = '<i class="fas fa-star"></i> Favorited';
+            } else {
+                button.classList.remove('btn-warning');
+                button.classList.add('btn-outline-warning');
+                button.innerHTML = '<i class="fas fa-star"></i> Favorite';
+            }
+        });
+    }
+
     function filterAndDisplayResources() {
         const cards = document.querySelectorAll('#resourceList .card');
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const favorites = getFavorites();
         
         cards.forEach(card => {
-            const categoryBadge = card.querySelector('.badge');
-            const resourceName = card.querySelector('.card-title').textContent.toLowerCase();
-            const resourceTags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
-            const resourceId = card.querySelector('.favorite-btn').dataset.resourceId;
+            const resourceId = parseInt(card.querySelector('.favorite-btn').dataset.resourceId);
+            const category = card.dataset.category;
+            const tags = card.dataset.tags.split(',');
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
             
             let matchesCategory = true;
             if (currentCategory === 'favorites') {
                 matchesCategory = favorites.includes(resourceId);
             } else if (currentCategory !== 'all') {
-                matchesCategory = categoryBadge.textContent.toLowerCase() === currentCategory;
+                matchesCategory = category.toLowerCase() === currentCategory.toLowerCase();
             }
             
             const matchesSearch = !currentSearchQuery || 
-                                resourceName.includes(currentSearchQuery) ||
-                                resourceTags.some(tag => tag.includes(currentSearchQuery));
+                                title.includes(currentSearchQuery) ||
+                                tags.some(tag => tag.toLowerCase().includes(currentSearchQuery));
             
             card.style.display = matchesCategory && matchesSearch ? '' : 'none';
-            
-            // Update favorite button state
-            const favoriteBtn = card.querySelector('.favorite-btn');
-            if (favorites.includes(resourceId)) {
-                favoriteBtn.classList.add('btn-warning');
-                favoriteBtn.classList.remove('btn-outline-warning');
-                favoriteBtn.innerHTML = '<i class="fas fa-star"></i> Favorited';
-            } else {
-                favoriteBtn.classList.remove('btn-warning');
-                favoriteBtn.classList.add('btn-outline-warning');
-                favoriteBtn.innerHTML = '<i class="fas fa-star"></i> Favorite';
-            }
         });
     }
 
     // Search input handler with debounce
-    searchInput.addEventListener('input', function() {
-        currentSearchQuery = this.value.toLowerCase();
-        
-        // Clear previous timeout
-        clearTimeout(searchTimeout);
-        
-        // Add loading state
-        searchInput.classList.add('loading');
-        
-        // Set new timeout
-        searchTimeout = setTimeout(() => {
-            if (currentSearchQuery.length < 2) {
-                searchSuggestions.classList.remove('show');
-                searchInput.classList.remove('loading');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            currentSearchQuery = this.value.toLowerCase();
+            
+            // Clear previous timeout
+            clearTimeout(searchTimeout);
+            
+            // Set new timeout
+            searchTimeout = setTimeout(() => {
+                if (currentSearchQuery.length < 2) {
+                    searchSuggestions.style.display = 'none';
+                    filterAndDisplayResources();
+                    return;
+                }
+
                 filterAndDisplayResources();
-                return;
-            }
-
-            const suggestions = resourcesData.filter(resource => 
-                resource.name.toLowerCase().includes(currentSearchQuery) ||
-                resource.tags.some(tag => tag.toLowerCase().includes(currentSearchQuery))
-            );
-
-            searchSuggestions.innerHTML = suggestions.map(resource => `
-                <div class="suggestion-item" data-resource-id="${resource.id}">
-                    <i class="fas fa-search"></i>
-                    <div>
-                        <div>${resource.name}</div>
-                        <small class="text-muted">${resource.category}</small>
-                    </div>
-                </div>
-            `).join('');
-
-            searchSuggestions.classList.add('show');
-            searchInput.classList.remove('loading');
-            filterAndDisplayResources();
-        }, 300); // 300ms debounce
-    });
-
-    // Handle suggestion clicks
-    searchSuggestions.addEventListener('click', function(e) {
-        const suggestionItem = e.target.closest('.suggestion-item');
-        if (suggestionItem) {
-            const resourceId = suggestionItem.dataset.resourceId;
-            const resource = resourcesData.find(r => r.id === parseInt(resourceId));
-            if (resource) {
-                searchInput.value = resource.name;
-                currentSearchQuery = resource.name.toLowerCase();
-                searchSuggestions.classList.remove('show');
-                filterAndDisplayResources();
-            }
-        }
-    });
-
-    // Close suggestions when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!searchInput.contains(e.target) && !searchSuggestions.contains(e.target)) {
-            searchSuggestions.classList.remove('show');
-        }
-    });
+            }, 300); // 300ms debounce
+        });
+    }
 
     // Handle category filter clicks
-    document.getElementById('categoryFilter').addEventListener('click', function(e) {
-        if (e.target.classList.contains('list-group-item-action')) {
-            // Remove active class from all buttons
-            document.querySelectorAll('#categoryFilter .list-group-item-action').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Add active class to clicked button
-            e.target.classList.add('active');
-            
-            // Update current category
-            currentCategory = e.target.dataset.category;
-            
-            // Filter resources
-            filterAndDisplayResources();
-        }
-    });
-
-    // Handle details view
-    document.querySelectorAll('.view-details').forEach(button => {
-        button.addEventListener('click', function() {
-            const resourceId = this.dataset.resourceId;
-            const resource = resourcesData.find(r => r.id === resourceId);
-            
-            if (resource) {
-                const detailsContainer = document.getElementById('resourceDetails');
-                detailsContainer.innerHTML = `
-                    <div class="resource-detail-header mb-4">
-                        <h4>${resource.name}</h4>
-                        <div class="mb-2">
-                            <span class="badge bg-primary">${resource.category}</span>
-                            ${resource.is_new ? '<span class="badge bg-success ms-1">New</span>' : ''}
-                        </div>
-                        <div class="mb-3">
-                            ${resource.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="detail-stats">
-                                <p><i class="far fa-calendar-alt me-2"></i> Added on: ${resource.date_added.split('T')[0]}</p>
-                                <p><i class="far fa-user me-2"></i> Added by: ${resource.added_by}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <a href="${resource.url}" target="_blank" class="btn btn-primary">
-                                <i class="fas fa-external-link-alt me-2"></i> Visit Resource
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-align-left me-2"></i> Description</h5>
-                        </div>
-                        <div class="card-body markdown-content">
-                            ${marked(resource.description)}
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-comments me-2"></i> Comments</h5>
-                        </div>
-                        <div class="card-body">
-                            ${resource.comments && resource.comments.length ? 
-                                resource.comments.map(comment => `
-                                    <div class="comment mb-3 pb-3 border-bottom">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <span class="fw-bold me-2">${comment.user}</span>
-                                            <small class="text-muted">${comment.date}</small>
-                                        </div>
-                                        <p class="mb-0">${comment.text}</p>
-                                    </div>
-                                `).join('') : 
-                                '<p class="text-muted">No comments yet. Be the first to leave feedback!</p>'
-                            }
-                            
-                            <form class="mt-4" id="commentForm">
-                                <input type="hidden" name="resourceId" value="${resource.id}">
-                                <div class="mb-3">
-                                    <label class="form-label">Add a comment</label>
-                                    <textarea class="form-control" name="comment" rows="3" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit Comment</button>
-                            </form>
-                        </div>
-                    </div>
-                `;
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('click', function(e) {
+            if (e.target.classList.contains('list-group-item-action')) {
+                // Remove active class from all buttons
+                document.querySelectorAll('#categoryFilter .list-group-item-action').forEach(btn => {
+                    btn.classList.remove('active');
+                });
                 
-                // Show the modal
-                const modal = new bootstrap.Modal(document.getElementById('resourceDetailsModal'));
-                modal.show();
-            }
-        });
-    });
-
-    // Handle add resource form submission
-    document.getElementById('submitResource').addEventListener('click', function() {
-        const form = document.getElementById('addResourceForm');
-        if (form.checkValidity()) {
-            const formData = new FormData(form);
-            const newResource = {
-                name: formData.get('name'),
-                category: formData.get('category'),
-                tags: formData.get('tags').split(',').map(tag => tag.trim()),
-                description: formData.get('description'),
-                url: formData.get('url')
-            };
-            
-            // Make API call to add resource
-            fetch('/api/resources', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newResource)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to add resource');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addResourceModal'));
-                modal.hide();
+                // Add active class to clicked button
+                e.target.classList.add('active');
                 
-                // Reset form
-                form.reset();
+                // Update current category
+                currentCategory = e.target.dataset.category;
                 
-                // Show success message
-                alert('Resource added successfully!');
-                
-                // Reload the page to show new resource
-                location.reload();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to add resource. Please try again.');
-            });
-        } else {
-            form.reportValidity();
-        }
-    });
-
-    // Initialize any components that need it
-    if (typeof marked !== 'undefined') {
-        marked.setOptions({
-            sanitize: true,
-            breaks: true
-        });
-        
-        // Convert markdown in description previews
-        document.querySelectorAll('.markdown-content').forEach(el => {
-            if (el.innerHTML) {
-                el.innerHTML = marked(el.textContent);
+                // Filter resources
+                filterAndDisplayResources();
             }
         });
     }
 
-    // Load analytics data
-    function loadAnalytics() {
-        fetch('/api/analytics')
-            .then(response => response.json())
-            .then(data => {
-                // Update trending resources
-                const trendingHtml = data.most_viewed.map(resource => `
-                    <div class="trending-item mb-2">
-                        <a href="/resource/${resource.id}" class="text-decoration-none">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-chart-line text-primary me-2"></i>
-                                <div>
-                                    <div class="small">${resource.name}</div>
-                                    <div class="text-muted small">${resource.views} views</div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                `).join('');
-                document.getElementById('trendingResources').innerHTML = trendingHtml;
-            })
-            .catch(error => console.error('Error loading analytics:', error));
-    }
-
-    // Tag suggestions
-    const tagInput = document.querySelector('input[name="tags"]');
-    if (tagInput) {
-        let tagSuggestionsTimeout;
-        tagInput.addEventListener('input', function() {
-            clearTimeout(tagSuggestionsTimeout);
-            const query = this.value.split(',').pop().trim();
-            
-            if (query.length < 2) return;
-            
-            tagSuggestionsTimeout = setTimeout(() => {
-                fetch(`/api/tags/suggestions?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(suggestions => {
-                        if (suggestions.length > 0) {
-                            const suggestionsHtml = suggestions.map(tag => `
-                                <div class="tag-suggestion" onclick="selectTagSuggestion('${tag}')">
-                                    <i class="fas fa-tag me-2"></i>${tag}
-                                </div>
-                            `).join('');
-                            
-                            const suggestionsContainer = document.createElement('div');
-                            suggestionsContainer.className = 'tag-suggestions';
-                            suggestionsContainer.innerHTML = suggestionsHtml;
-                            
-                            // Remove existing suggestions if any
-                            const existing = document.querySelector('.tag-suggestions');
-                            if (existing) existing.remove();
-                            
-                            // Add new suggestions
-                            tagInput.parentNode.appendChild(suggestionsContainer);
-                        }
-                    });
-            }, 300);
-        });
-    }
-
-    // Load analytics on page load
-    loadAnalytics();
-
-    // Initialize favorite buttons state
-    function initializeFavorites() {
-        filterAndDisplayResources();
-    }
-
-    // Call initialization
-    initializeFavorites();
-
-    // Handle favorite button
+    // Handle favorite buttons
     document.querySelectorAll('.favorite-btn').forEach(button => {
         button.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent card click
-            const resourceId = this.dataset.resourceId;
-            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            e.preventDefault();
+            e.stopPropagation();
             
-            // Toggle favorite status
-            const isFavorite = this.classList.contains('btn-warning');
+            const resourceId = parseInt(this.dataset.resourceId);
+            let favorites = getFavorites();
+            const isFavorited = favorites.includes(resourceId);
             
-            // Update localStorage
-            if (isFavorite) {
-                const index = favorites.indexOf(resourceId);
-                if (index > -1) {
-                    favorites.splice(index, 1);
-                }
+            if (isFavorited) {
+                // Remove from favorites
+                favorites = favorites.filter(id => id !== resourceId);
             } else {
+                // Add to favorites
                 favorites.push(resourceId);
             }
-            localStorage.setItem('favorites', JSON.stringify(favorites));
             
-            // Update all favorite buttons for this resource
-            document.querySelectorAll(`.favorite-btn[data-resource-id="${resourceId}"]`).forEach(btn => {
-                if (isFavorite) {
-                    btn.classList.remove('btn-warning');
-                    btn.classList.add('btn-outline-warning');
-                    btn.innerHTML = '<i class="fas fa-star"></i> Favorite';
-                } else {
-                    btn.classList.add('btn-warning');
-                    btn.classList.remove('btn-outline-warning');
-                    btn.innerHTML = '<i class="fas fa-star"></i> Favorited';
-                }
-            });
+            // Save updated favorites
+            saveFavorites(favorites);
             
-            // Update UI if we're in favorites view
+            // Update UI
+            updateFavoriteButtons();
+            
+            // If in favorites view, update displayed resources
             if (currentCategory === 'favorites') {
                 filterAndDisplayResources();
             }
             
-            // Show toast notification
-            const toast = document.createElement('div');
-            toast.className = 'toast success';
-            toast.innerHTML = isFavorite ? 'Resource removed from favorites' : 'Resource added to favorites';
-            document.body.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            // Remove toast after it's hidden
-            toast.addEventListener('hidden.bs.toast', function() {
-                toast.remove();
-            });
+            // Show feedback to user
+            const message = isFavorited ? 'Resource removed from favorites' : 'Resource added to favorites';
+            showToast(message, 'success');
         });
     });
-});
 
-// Tag suggestion selection
-function selectTagSuggestion(tag) {
-    const tagInput = document.querySelector('input[name="tags"]');
-    const tags = tagInput.value.split(',').slice(0, -1);
-    tags.push(tag);
-    tagInput.value = tags.join(', ') + ', ';
-    tagInput.focus();
-    
-    // Remove suggestions
-    const suggestions = document.querySelector('.tag-suggestions');
-    if (suggestions) suggestions.remove();
-}
+    // Show toast notification
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = message;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.padding = '10px 20px';
+        toast.style.backgroundColor = type === 'success' ? '#d4edda' : '#cce5ff';
+        toast.style.borderColor = type === 'success' ? '#c3e6cb' : '#b8daff';
+        toast.style.color = type === 'success' ? '#155724' : '#004085';
+        toast.style.borderRadius = '4px';
+        toast.style.zIndex = '1050';
+        document.body.appendChild(toast);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Initialize
+    updateFavoriteButtons();
+    filterAndDisplayResources();
+});
 </script>
 
 <style>
-.tag-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    z-index: 1000;
-    max-height: 200px;
-    overflow-y: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.tag-suggestion {
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.tag-suggestion:hover {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.trending-item {
-    transition: transform 0.2s;
-}
-
-.trending-item:hover {
-    transform: translateX(5px);
-}
-
 .tag-sm {
     font-size: 0.8rem;
     padding: 0.2rem 0.5rem;
     margin: 0.2rem;
     display: inline-block;
-}
-
-[data-theme="dark"] .tag-suggestions {
-    background-color: var(--card-bg);
-    border-color: var(--border-color);
-}
-
-[data-theme="dark"] .tag-suggestion {
-    color: var(--text-color);
-}
-
-[data-theme="dark"] .tag-suggestion:hover {
-    background-color: var(--secondary-color);
-    color: white;
 }
 
 /* Toast notification styles */

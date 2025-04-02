@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TinyMCE Rich Text Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            margin-bottom: 20px;
+        }
+        #submit-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #submit-btn:hover {
+            background-color: #45a049;
+        }
+        #display-content {
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+        .content-box {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+    </style>
+    <!-- TinyMCE CDN Script -->
+    <script src="https://cdn.tiny.cloud/1/no17idvqooop2hz590huxkpthgsoutf3f5kb89qobgl0dkfl/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+</head>
+<body>
+    <h1>Rich Text Editor</h1>
+    
+    <div class="container">
+        <div id="editor-container">
+            <textarea id="editor"></textarea>
+        </div>
+        <button id="submit-btn">Submit</button>
+    </div>
+    
+    <div id="display-content">
+        <h2>Submitted Content</h2>
+        <div id="content-display" class="content-box">
+            <p>Your submitted content will appear here.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#editor',
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+            height: 300
+        });
+        
+        // Handle submit button click
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            // Get content from TinyMCE editor
+            const content = tinymce.get('editor').getContent();
+            
+            // Display the content
+            document.getElementById('content-display').innerHTML = content;
+        });
+    </script>
+</body>
+</html>

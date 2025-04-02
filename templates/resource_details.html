@@ -12,6 +12,16 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="resource-actions mb-4">
+                <div class="btn-group">
+                    <a href="{{ url_for('edit_resource', resource_id=resource.id) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit Resource
+                    </a>
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteResourceModal">
+                        <i class="fas fa-trash-alt"></i> Delete Resource
+                    </button>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-8">
                     <div class="card mb-4">
@@ -91,6 +101,28 @@
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteResourceModal" tabindex="-1" aria-labelledby="deleteResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteResourceModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the resource "<strong>{{ resource.name }}</strong>"?</p>
+                <p class="text-danger">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('delete_resource', resource_id=resource.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete Resource</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .similar-resource {
     transition: transform 0.2s;
@@ -114,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize favorite buttons
     const favoriteButtons = document.querySelectorAll('.favorite-btn');
     const resourceId = {{ resource.id }};
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     
     // Set initial state for all favorite buttons
     function updateFavoriteButtons() {
@@ -137,15 +169,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add click handlers
     favoriteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const isFavorite = this.classList.contains('btn-warning');
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isFavorite = favorites.includes(resourceId);
             
             // Update localStorage
             if (isFavorite) {
-                const index = favorites.indexOf(resourceId);
-                if (index > -1) {
-                    favorites.splice(index, 1);
-                }
+                favorites = favorites.filter(id => id !== resourceId);
             } else {
                 favorites.push(resourceId);
             }
@@ -154,20 +184,23 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update all favorite buttons
             updateFavoriteButtons();
             
-            // Show toast notification
-            const toast = document.createElement('div');
-            toast.className = 'toast success';
-            toast.innerHTML = isFavorite ? 'Resource removed from favorites' : 'Resource added to favorites';
-            document.body.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
+            // Show feedback
+            const message = isFavorite ? 'Resource removed from favorites' : 'Resource added to favorites';
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.container').prepend(alertDiv);
             
-            // Remove toast after it's hidden
-            toast.addEventListener('hidden.bs.toast', function() {
-                toast.remove();
-            });
+            // Auto-dismiss alert after 3 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 3000);
         });
     });
 });
 </script>
-{% endblock %} 
+{% endblock %}
