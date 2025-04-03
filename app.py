@@ -487,5 +487,34 @@ def favorites_page():
     return render_template("favorites.html", resources=data["resources"], popular_tags=popular_tags)
 
 
+@app.route("/browse")
+def content_index():
+    """Route for the content index page with organized category and tag browsing"""
+    data = load_resources()
+    resources = data["resources"]
+    categories = get_categories()
+    
+    # Get all unique tags across resources
+    all_tags = set()
+    for resource in resources:
+        all_tags.update(resource["tags"])
+    
+    # Sort tags alphabetically
+    sorted_tags = sorted(list(all_tags))
+    
+    # Group resources by category
+    resources_by_category = {}
+    for category in categories:
+        category_resources = [r for r in resources if r["category"] == category["slug"]]
+        resources_by_category[category["slug"]] = category_resources
+    
+    return render_template(
+        "content_index.html", 
+        categories=categories,
+        resources_by_category=resources_by_category,
+        all_tags=sorted_tags
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)

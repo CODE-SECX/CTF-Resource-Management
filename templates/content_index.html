@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-sitemap"></i> Content Index</h1>
+            <p class="lead">Browse all resources by category or tag</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left sidebar for tags -->
+        <div class="col-md-3">
+            <div class="card mb-4 sticky-top" style="top: 20px; z-index: 100;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tags"></i> Filter by Tag</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap" id="tag-filter">
+                        <button class="btn btn-sm btn-outline-secondary m-1 tag-btn active" data-tag="all">
+                            All Tags
+                        </button>
+                        {% for tag in all_tags %}
+                        <button class="btn btn-sm btn-outline-primary m-1 tag-btn" data-tag="{{ tag }}">
+                            {{ tag }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content area with categorized resources -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Resources by Category</h5>
+                    <button id="expand-all-btn" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-expand-alt"></i> Expand All
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="categories-accordion" class="accordion">
+                        {% for category in categories %}
+                        <div class="accordion-item category-item">
+                            <h2 class="accordion-header" id="heading-{{ category.slug }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse-{{ category.slug }}" aria-expanded="false" 
+                                        aria-controls="collapse-{{ category.slug }}">
+                                    <i class="{{ category.icon }} me-2"></i> {{ category.name }} 
+                                    <span class="badge bg-secondary ms-2 resource-count">
+                                        {{ resources_by_category[category.slug]|length }}
+                                    </span>
+                                </button>
+                            </h2>
+                            <div id="collapse-{{ category.slug }}" class="accordion-collapse collapse" 
+                                 aria-labelledby="heading-{{ category.slug }}" data-bs-parent="#categories-accordion">
+                                <div class="accordion-body">
+                                    <div class="list-group">
+                                        {% for resource in resources_by_category[category.slug] %}
+                                        <a href="{{ url_for('resource_details', resource_id=resource.id) }}" 
+                                           class="list-group-item list-group-item-action resource-item"
+                                           data-tags="{{ resource.tags|join(',') }}">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{ resource.name }}</h5>
+                                                <small>{{ resource.date_added.split('T')[0] }}</small>
+                                            </div>
+                                            <div class="mb-1 text-muted resource-description">
+                                                {{ resource.description|truncate(100) }}
+                                            </div>
+                                            <div>
+                                                {% for tag in resource.tags %}
+                                                <span class="badge bg-primary me-1">{{ tag }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </a>
+                                        {% else %}
+                                        <div class="list-group-item text-muted">No resources in this category</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tag filtering
+    const tagButtons = document.querySelectorAll('.tag-btn');
+    const resourceItems = document.querySelectorAll('.resource-item');
+    const categoryItems = document.querySelectorAll('.category-item');
+    const expandAllBtn = document.getElementById('expand-all-btn');
+    let currentTag = 'all';
+    let isExpanded = false;
+    
+    // Handle tag button clicks
+    tagButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tag = this.dataset.tag;
+            
+            // Update active button
+            tagButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            currentTag = tag;
+            filterResourcesByTag(tag);
+        });
+    });
+    
+    // Filter resources by tag
+    function filterResourcesByTag(tag) {
+        // For each resource item
+        resourceItems.forEach(item => {
+            const resourceTags = item.dataset.tags.split(',');
+            if (tag === 'all' || resourceTags.includes(tag)) {
+                item.style.display = '';
+                item.classList.add('filtered-in');
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('filtered-in');
+            }
+        });
+        
+        // Update category visibility and resource counts
+        updateCategoryVisibility();
+    }
+    
+    // Update category visibility and resource counts
+    function updateCategoryVisibility() {
+        categoryItems.forEach(category => {
+            const categoryBody = category.querySelector('.accordion-body');
+            const visibleResources = categoryBody.querySelectorAll('.resource-item.filtered-in');
+            const countBadge = category.querySelector('.resource-count');
+            
+            // Update count badge
+            countBadge.textContent = visibleResources.length;
+            
+            // Show/hide category based on whether it has visible resources
+            if (visibleResources.length === 0) {
+                category.style.display = 'none';
+            } else {
+                category.style.display = '';
+                
+                // If filtering by tag and category has matching resources, expand it
+                if (currentTag !== 'all') {
+                    const collapseElement = category.querySelector('.accordion-collapse');
+                    const bsCollapse = new bootstrap.Collapse(collapseElement, {
+                        toggle: false
+                    });
+                    bsCollapse.show();
+                }
+            }
+        });
+    }
+    
+    // Expand/collapse all categories
+    expandAllBtn.addEventListener('click', function() {
+        isExpanded = !isExpanded;
+        
+        // Update button text
+        this.innerHTML = isExpanded 
+            ? '<i class="fas fa-compress-alt"></i> Collapse All'
+            : '<i class="fas fa-expand-alt"></i> Expand All';
+        
+        // Get all accordion items
+        const collapseElements = document.querySelectorAll('.accordion-collapse');
+        
+        // Toggle each one
+        collapseElements.forEach(element => {
+            const bsCollapse = new bootstrap.Collapse(element, {
+                toggle: false
+            });
+            
+            if (isExpanded) {
+                bsCollapse.show();
+            } else {
+                bsCollapse.hide();
+            }
+        });
+    });
+    
+    // Click on tag in resource item to filter by that tag
+    document.querySelectorAll('.resource-item .badge').forEach(badge => {
+        badge.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const tag = this.textContent.trim();
+            
+            // Find and click the corresponding tag button
+            tagButtons.forEach(button => {
+                if (button.dataset.tag === tag) {
+                    button.click();
+                    
+                    // Scroll to the tag filter section
+                    document.getElementById('tag-filter').scrollIntoView({
+                        behavior: 'smooth', 
+                        block: 'center'
+                    });
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+/* Make tags in resources clickable */
+.resource-item .badge {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.resource-item .badge:hover {
+    transform: scale(1.1);
+}
+
+/* Highlight active tag filter */
+.tag-btn.active {
+    font-weight: bold;
+}
+
+.resource-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Improve accordion styling */
+.accordion-button:not(.collapsed) {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    color: white;
+}
+
+/* Make the tag filter section sticky but with some space from top */
+.sticky-top {
+    top: 20px;
+}
+</style>
+{% endblock %}

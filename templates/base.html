@@ -476,7 +476,7 @@
         }
 
         .card-title {
-            color: var(--text-color);
+            color: var (--text-color);
         }
 
         [data-theme="dark"] .card-title {
@@ -672,6 +672,9 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('content_index') }}"><i class="fas fa-sitemap"></i> Browse Content</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('favorites_page') }}"><i class="fas fa-star"></i> Favorites</a>
