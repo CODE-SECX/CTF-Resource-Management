@@ -35,7 +35,7 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 5,
+            "views": 6,
             "description_html": "<h1><strong>Example Usage</strong></h1>\n<p><code><strong><span style=\"font-size: 14pt;\">stegolsb steglsb -r -i pic.png -o new</span></strong></code></p>",
             "date_updated": "2025-04-03T19:45:09.947263"
         },
@@ -73,7 +73,7 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 2,
+            "views": 3,
             "description_html": "<p>A Windows SSTV decoder receiving program<br>specially designed for SWL's and HAM's</p>"
         },
         {
