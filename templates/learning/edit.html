@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-4">Edit Learning Resource</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('learning_index') }}">Learning</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('view_learning', learning_id=learning.id) }}">{{ learning.title }}</a></li>
+                    <li class="breadcrumb-item active">Edit</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-body">
+            <form method="post" action="{{ url_for('edit_learning', learning_id=learning.id) }}">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title*</label>
+                    <input type="text" class="form-control" id="title" name="title" required 
+                           value="{{ learning.title }}" placeholder="E.g., Introduction to Buffer Overflows">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description*</label>
+                    <textarea class="form-control tinymce-editor" id="description" name="description" 
+                              rows="10" required>{{ learning.description }}</textarea>
+                    <small class="form-text text-muted">Use the rich text editor to format your content with headings, lists, code blocks, and more.</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="url" class="form-label">URL (Optional)</label>
+                    <input type="url" class="form-control" id="url" name="url" 
+                           value="{{ learning.url }}" placeholder="https://example.com/learning-resource">
+                    <small class="form-text text-muted">Link to the original resource, if applicable.</small>
+                </div>
+
+                <div class="mb-4">
+                    <label for="difficulty" class="form-label">Difficulty Level*</label>
+                    <select class="form-select" id="difficulty" name="difficulty" required>
+                        <option value="Beginner" {% if learning.difficulty == 'Beginner' %}selected{% endif %}>Beginner</option>
+                        <option value="Intermediate" {% if learning.difficulty == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                        <option value="Advanced" {% if learning.difficulty == 'Advanced' %}selected{% endif %}>Advanced</option>
+                        <option value="Expert" {% if learning.difficulty == 'Expert' %}selected{% endif %}>Expert</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">Categories*</label>
+                    <div class="row">
+                        {% for category in categories %}
+                        <div class="col-md-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="categories" 
+                                       value="{{ category.id }}" id="category{{ category.id }}"
+                                       {% if category.id in learning.category_ids %}checked{% endif %}>
+                                <label class="form-check-label" for="category{{ category.id }}">
+                                    <i class="{{ category.icon }} me-1"></i> {{ category.name }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <small class="form-text text-muted">Select at least one category that best fits this learning resource.</small>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('view_learning', learning_id=learning.id) }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.tiny.cloud/1/no17idvqooop2hz590huxkpthgsoutf3f5kb89qobgl0dkfl/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set nav active state
+    document.getElementById('nav-learning').classList.add('active');
+    
+    // Initialize TinyMCE
+    if (typeof tinymce !== 'undefined') {
+        tinymce.init({
+            selector: '.tinymce-editor',
+            height: 400,
+            menubar: true,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount', 'codesample'
+            ],
+            toolbar: 'undo redo | blocks | ' +
+                'bold italic forecolor | alignleft aligncenter ' +
+                'alignright alignjustify | bullist numlist outdent indent | ' +
+                'removeformat | codesample | help',
+            codesample_languages: [
+                {text: 'HTML/XML', value: 'markup'},
+                {text: 'JavaScript', value: 'javascript'},
+                {text: 'CSS', value: 'css'},
+                {text: 'PHP', value: 'php'},
+                {text: 'Ruby', value: 'ruby'},
+                {text: 'Python', value: 'python'},
+                {text: 'Java', value: 'java'},
+                {text: 'C', value: 'c'},
+                {text: 'C#', value: 'csharp'},
+                {text: 'C++', value: 'cpp'},
+                {text: 'Bash', value: 'bash'}
+            ],
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            // Fix for validation error - remove required attribute
+            setup: function(editor) {
+                editor.on('init', function() {
+                    // Remove required attribute from textarea after TinyMCE initializes it
+                    this.getElement().removeAttribute('required');
+                });
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        // Check TinyMCE content
+        if (tinymce.get('description').getContent() === '') {
+            event.preventDefault();
+            alert('Please fill in the description field.');
+            return false;
+        }
+        
+        // Check categories
+        const categoryCheckboxes = document.querySelectorAll('input[name="categories"]:checked');
+        if (categoryCheckboxes.length === 0) {
+            event.preventDefault();
+            alert('Please select at least one category.');
+            return false;
+        }
+        
+        // Transfer content from TinyMCE to the textarea before submit
+        tinymce.get('description').save();
+    });
+});
+</script>
+{% endblock %}

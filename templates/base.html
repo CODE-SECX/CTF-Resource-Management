@@ -1,309 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF Resource Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --background-color: #ffffff;
-            --text-color: #2c3e50;
-            --card-bg: #f8f9fa;
-            --border-color: #dee2e6;
-            --shadow-color: rgba(0,0,0,0.1);
+            --transition-fast: 0.2s;
+            --transition-medium: 0.3s;
+            --transition-slow: 0.5s;
+            --bs-body-color: #e9ecef;
+            --bs-body-bg: #212529;
+            
+            /* Dark theme variables only */
+            --primary-color: #0f172a;
+            --secondary-color: #3b82f6;
+            --accent-color: #f43f5e;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            
+            --background-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --shadow-color: rgba(0, 0, 0, 0.2);
         }
 
-        [data-theme="dark"] {
-            --primary-color: #1a1a1a;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --background-color: #121212;
-            --text-color: #ffffff;
-            --card-bg: #1e1e1e;
-            --border-color: #2d2d2d;
-            --shadow-color: rgba(0,0,0,0.3);
-        }
-
+        /* Global Styles */
         body {
             background-color: var(--background-color);
             color: var(--text-color);
-            transition: all 0.3s ease;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Navbar Styles */
         .navbar {
-            background-color: var(--primary-color);
-            box-shadow: 0 2px 8px var(--shadow-color);
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
             padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .navbar-brand {
-            font-size: 1.5rem;
+            color: var(--text-color) !important;
             font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
         }
 
         .navbar-brand i {
             color: var(--secondary-color);
-            margin-right: 0.5rem;
+            margin-right: 0.75rem;
+            transition: transform var(--transition-medium) ease;
         }
 
+        .navbar-brand:hover i {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem;
+            transition: all var(--transition-fast) ease;
+            margin: 0 0.25rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text-color) !important;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link i {
+            color: var(--secondary-color);
+            margin-right: 0.5rem;
+            transition: transform var(--transition-fast) ease;
+        }
+
+        .nav-link:hover i {
+            transform: translateX(3px);
+        }
+
+        .nav-item.active .nav-link {
+            color: var(--text-color) !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+
+        /* Card Styles */
         .card {
             background-color: var(--card-bg);
-            border-color: var(--border-color);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-bottom: 1.5rem;
+            transition: transform var(--transition-medium) ease, box-shadow var(--transition-medium) ease;
+            overflow: hidden;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px var(--shadow-color);
+            box-shadow: 0 10px 20px var(--shadow-color);
         }
 
         .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 0.5rem 0.5rem 0 0 !important;
-            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all var(--transition-fast) ease;
         }
 
         .btn-primary {
             background-color: var(--secondary-color);
             border-color: var(--secondary-color);
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
         }
 
         .btn-primary:hover {
-            background-color: #2980b9;
-            border-color: #2980b9;
+            background-color: #2563eb;
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
         }
 
-        .table {
-            color: var(--text-color);
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--border-color);
-            font-weight: 500;
-            padding: 1rem;
-        }
-
-        .table tbody tr {
-            background-color: var (--card-bg);
-            transition: background-color 0.2s ease;
-        }
-
-        .table tbody tr:hover {
-            background-color: var(--border-color);
-        }
-
-        .table td {
-            padding: 1rem;
-            vertical-align: middle;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .tag {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            margin: 0.25rem;
-            display: inline-block;
+        .btn-sm {
+            padding: 0.3rem 0.8rem;
             font-size: 0.875rem;
-            transition: background-color 0.2s ease;
         }
 
-        .tag:hover {
-            background-color: #2980b9;
-            cursor: pointer;
-        }
-
-        .search-box {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 1rem 1.5rem 1rem 3rem;
-            border-radius: 2rem;
-            border: 2px solid var(--border-color);
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px var(--shadow-color);
-        }
-
-        .search-box input:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
-            outline: none;
-        }
-
-        .search-box::before {
-            content: '\f002';
-            font-family: 'Font Awesome 5 Free';
-            font-weight: 900;
-            position: absolute;
-            left: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--secondary-color);
-            font-size: 1.1rem;
-        }
-
-        .search-suggestions {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            left: 1rem;
-            right: 1rem;
-            background-color: var(--card-bg);
+        /* Form Styles */
+        .form-control {
+            background-color: var(--background-color);
             border: 1px solid var(--border-color);
-            border-radius: 1rem;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-
-        .search-suggestions.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .suggestion-item {
-            padding: 1rem 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-item:hover {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .suggestion-item i {
-            color: var(--secondary-color);
-            font-size: 1.1rem;
-        }
-
-        .suggestion-item:hover i {
-            color: white;
-        }
-
-        /* Add a subtle animation for the search icon */
-        @keyframes searchPulse {
-            0% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.1); }
-            100% { transform: translateY(-50%) scale(1); }
-        }
-
-        .search-box input:focus + .search-box::before {
-            animation: searchPulse 1s infinite;
-        }
-
-        .rating {
-            color: #f1c40f;
-        }
-
-        .rating i {
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .rating i:hover {
-            transform: scale(1.2);
-        }
-
-        .btn-outline-primary {
-            color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .btn-outline-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .btn-outline-warning {
-            color: #f1c40f;
-            border-color: #f1c40f;
-        }
-
-        .btn-outline-warning:hover {
-            background-color: #f1c40f;
-            border-color: #f1c40f;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
+            color: var(--text-color);
             border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: all var(--transition-medium) ease;
         }
 
-        .modal-header {
-            border-bottom-color: var(--border-color);
-        }
-
-        .modal-footer {
-            border-top-color: var(--border-color);
-        }
-
-        .form-control, .form-select {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-            color: var(--text-color);
-        }
-
-        .form-control:focus, .form-select:focus {
-            background-color: var(--card-bg);
+        .form-control:focus {
+            background-color: var(--background-color);
             border-color: var(--secondary-color);
-            color: var(--text-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            color: var (--text-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
         }
 
+        /* List Group Styles */
         .list-group-item {
             background-color: var(--card-bg);
             border-color: var(--border-color);
             color: var(--text-color);
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast) ease;
+            padding: 1rem 1.25rem;
         }
 
         .list-group-item:hover {
-            background-color: var(--border-color);
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(3px);
         }
 
         .list-group-item.active {
@@ -311,356 +203,101 @@
             border-color: var(--secondary-color);
         }
 
-        .markdown-content {
-            color: var(--text-color);
-            line-height: 1.6;
+        /* Badge Styles */
+        .badge {
+            padding: 0.35em 0.65em;
+            font-weight: 600;
+            border-radius: 0.375rem;
         }
 
-        .markdown-content h1,
-        .markdown-content h2,
-        .markdown-content h3,
-        .markdown-content h4,
-        .markdown-content h5,
-        .markdown-content h6 {
-            color: var(--text-color);
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
+        /* Animation Durations */
+        .animate__animated {
+            animation-duration: 0.5s !important;
         }
 
-        .markdown-content p {
-            margin-bottom: 1rem;
-        }
-
-        .markdown-content ul,
-        .markdown-content ol {
-            margin-bottom: 1rem;
-            padding-left: 2rem;
-        }
-
-        .markdown-content li {
-            margin-bottom: 0.5rem;
-        }
-
-        .markdown-content code {
-            background-color: var(--border-color);
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-            font-family: monospace;
-        }
-
-        .markdown-content pre {
-            background-color: var(--border-color);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-        }
-
-        .markdown-content pre code {
-            background-color: transparent;
-            padding: 0;
-        }
-
-        .markdown-content a {
-            color: var(--secondary-color);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .markdown-content a:hover {
-            color: #2980b9;
-            text-decoration: underline;
-        }
-
-        .markdown-content blockquote {
-            border-left: 4px solid var(--secondary-color);
-            margin: 1rem 0;
-            padding-left: 1rem;
-            color: var(--text-color);
-        }
-
+        /* Footer Styles */
         footer {
             margin-top: auto;
-            padding: 2rem 0;
+            padding: 2.5rem 0;
             background-color: var(--primary-color);
-            color: white;
+            color: var(--text-color);
         }
 
         .footer-content {
             text-align: center;
         }
 
-        .footer-content p {
-            margin: 0.5rem 0;
-        }
-
-        .footer-content a {
-            color: var(--secondary-color);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .footer-content a:hover {
-            color: #2980b9;
-        }
-        
-        /* Enhanced styles */
-        .resource-actions {
+        .footer-links {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all var(--transition-fast) ease;
+            display: flex;
+            align-items: center;
             gap: 0.5rem;
         }
-        
-        .spotlight-resource {
-            border-left: 4px solid var(--accent-color);
+
+        .footer-links a:hover {
+            color: var(--text-color);
+            transform: translateY(-3px);
         }
-        
-        .stats-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            margin-right: 0.5rem;
-            font-size: 0.875rem;
+
+        /* Toast Styles */
+        .toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 350px;
         }
-        
-        .category-badge {
-            background-color: var(--secondary-color);
-            padding: 0.35rem 0.85rem;
-            font-weight: 500;
-        }
-        
-        /* Pulse animation for new items */
-        .pulse {
-            position: relative;
-        }
-        
-        .pulse::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+
+        .toast {
+            background-color: var(--card-bg);
             border-radius: 0.5rem;
-            box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
-            animation: pulse 2s infinite;
-            z-index: -1;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            animation: slideInRight var(--transition-medium) ease forwards;
+            border-left: 4px solid var(--info-color);
+            color: var(--text-color);
         }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 0.75rem;
             }
-            70% {
-                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+
+            .navbar {
+                padding: 0.75rem 0;
             }
-            100% {
-                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+
+            .card {
+                margin-bottom: 1rem;
             }
-        }
 
-        /* Statistics section specific styles */
-        .card-body ul li {
-            color: var(--text-color);
-        }
-
-        .card-body ul li i {
-            color: var(--accent-color);
-        }
-
-        .card-body ul li span {
-            color: var(--text-color);
-        }
-
-        .card-title {
-            color: var (--text-color);
-        }
-
-        [data-theme="dark"] .card-title {
-            color: var(--text-color);
-        }
-
-        /* Dark mode specific styles */
-        [data-theme="dark"] .card {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-        }
-
-        [data-theme="dark"] .card-body {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .text-muted {
-            color: #a0a0a0 !important;
-        }
-
-        [data-theme="dark"] .form-control,
-        [data-theme="dark"] .form-select {
-            background-color: #2d2d2d;
-            border-color: var(--border-color);
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .form-control:focus,
-        [data-theme="dark"] .form-select:focus {
-            background-color: #2d2d2d;
-            border-color: var(--secondary-color);
-            color: var(--text-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-        }
-
-        [data-theme="dark"] .modal-content {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-        }
-
-        [data-theme="dark"] .modal-header,
-        [data-theme="dark"] .modal-footer {
-            border-color: var(--border-color);
-        }
-
-        [data-theme="dark"] .list-group-item {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .list-group-item:hover {
-            background-color: #2d2d2d;
-        }
-
-        [data-theme="dark"] .list-group-item.active {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        [data-theme="dark"] .search-box input {
-            background-color: #2d2d2d;
-            border-color: var(--border-color);
-            color: var (--text-color);
-        }
-
-        [data-theme="dark"] .search-suggestions {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-        }
-
-        [data-theme="dark"] .suggestion-item {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .suggestion-item:hover {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        [data-theme="dark"] .suggestion-item small {
-            color: #a0a0a0;
-        }
-
-        [data-theme="dark"] .suggestion-item:hover small {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        [data-theme="dark"] .description {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .metadata p {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .metadata strong {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .rating-section h3 {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .rating-display {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .btn-outline-warning {
-            color: #ffc107;
-            border-color: #ffc107;
-        }
-
-        [data-theme="dark"] .btn-outline-warning:hover {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #000;
-        }
-
-        [data-theme="dark"] .btn-outline-warning.active {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #000;
-        }
-
-        [data-theme="dark"] .comment {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .comment .fw-bold {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .comment small {
-            color: #a0a0a0;
-        }
-
-        [data-theme="dark"] .comment p {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content h1,
-        [data-theme="dark"] .markdown-content h2,
-        [data-theme="dark"] .markdown-content h3,
-        [data-theme="dark"] .markdown-content h4,
-        [data-theme="dark"] .markdown-content h5,
-        [data-theme="dark"] .markdown-content h6 {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content p {
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content code {
-            background-color: #2d2d2d;
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content pre {
-            background-color: #2d2d2d;
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content blockquote {
-            border-left-color: var(--secondary-color);
-            color: var(--text-color);
-        }
-
-        [data-theme="dark"] .markdown-content a {
-            color: var(--secondary-color);
-        }
-
-        [data-theme="dark"] .markdown-content a:hover {
-            color: #2980b9;
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg sticky-top mb-4">
         <div class="container">
             <a class="navbar-brand" href="/">
                 <i class="fas fa-shield-alt"></i> CTF Resource Hub
@@ -670,36 +307,49 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
+                    <li class="nav-item" id="nav-home">
                         <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('content_index') }}"><i class="fas fa-sitemap"></i> Browse Content</a>
+                    
+                    <!-- Resources dropdown -->
+                    <li class="nav-item dropdown" id="nav-resources">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-sitemap"></i> Resources
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('resources_page') }}"><i class="fas fa-list me-2"></i> Browse Resources</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('content_index') }}"><i class="fas fa-th-large me-2"></i> Resource Index</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('add_resource_page') }}"><i class="fas fa-plus-circle me-2"></i> Add Resource</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('favorites_page') }}"><i class="fas fa-star me-2"></i> Favorites</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('category_management') }}"><i class="fas fa-tags me-2"></i> Manage Categories</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('favorites_page') }}"><i class="fas fa-star"></i> Favorites</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('add_resource_page') }}"><i class="fas fa-plus-circle"></i> Add Resource</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('category_management') }}"><i class="fas fa-tags"></i> Categories</a>
+                    
+                    <!-- Learning dropdown -->
+                    <li class="nav-item dropdown" id="nav-learning">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-graduation-cap"></i> Learning
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('learning_index') }}"><i class="fas fa-list me-2"></i> Browse Materials</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('learning_resource_index') }}"><i class="fas fa-th-large me-2"></i> Learning Index</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('add_learning_resource') }}"><i class="fas fa-plus-circle me-2"></i> Add Material</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('learning_category_management') }}"><i class="fas fa-tags me-2"></i> Manage Categories</a></li>
+                        </ul>
                     </li>
                 </ul>
-                <div class="d-flex align-items-center">
-                    <button class="btn btn-outline-light me-2" id="themeToggle">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
+                <!-- Theme toggle button removed -->
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4 mb-5">
+    <div class="container mb-5">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <div class="alert alert-info alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -713,42 +363,107 @@
     <footer>
         <div class="container">
             <div class="footer-content">
-                <p>CTF Resource Hub - Your One-Stop Shop for CTF Tools and Resources</p>
-                <p>Built with <i class="fas fa-heart" style="color: var(--accent-color);"></i> for the CTF Community</p>
-                <p>
-                    <a href="#" target="_blank"><i class="fab fa-github"></i> GitHub</a> |
-                    <a href="#" target="_blank"><i class="fab fa-twitter"></i> Twitter</a> |
+                <p class="h5 mb-3">CTF Resource Hub</p>
+                <p>Your One-Stop Shop for CTF Tools and Resources</p>
+                <div class="footer-links">
+                    <a href="#" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i> Twitter</a>
                     <a href="#" target="_blank"><i class="fas fa-envelope"></i> Contact</a>
+                </div>
+                <p class="mt-4">
+                    Built with <i class="fas fa-heart" style="color: var(--accent-color);"></i> for the CTF Community
                 </p>
             </div>
         </div>
     </footer>
 
+    <!-- Toast container -->
+    <div class="toast-container"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
-        const icon = themeToggle.querySelector('i');
+        // Theme toggle functionality removed
         
-        // Check for saved theme preference
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            icon.classList.replace('fa-moon', 'fa-sun');
+        // Always use dark mode
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        
+        // Active navigation highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navItems = document.querySelectorAll('.navbar-nav .nav-item');
+            
+            navItems.forEach(item => {
+                const link = item.querySelector('.nav-link');
+                if (link && link.getAttribute('href') === currentPath) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Home page special case
+            if (currentPath === '/') {
+                document.getElementById('nav-home').classList.add('active');
+            }
+            
+            // Content index special case
+            if (currentPath.includes('content_index')) {
+                document.getElementById('nav-browse').classList.add('active');
+            }
+            
+            // Favorites page special case
+            if (currentPath.includes('favorites')) {
+                document.getElementById('nav-favorites').classList.add('active');
+            }
+            
+            // Add resource special case
+            if (currentPath.includes('add_resource')) {
+                document.getElementById('nav-add').classList.add('active');
+            }
+            
+            // Categories special case
+            if (currentPath.includes('categories')) {
+                document.getElementById('nav-categories').classList.add('active');
+            }
+        });
+        
+        // Global toast notification function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.5s ease forwards';
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, 3000);
         }
-
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        // Add animation classes to cards when they appear in view
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateOnScroll = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeIn');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            };
             
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            const observer = new IntersectionObserver(animateOnScroll, {
+                root: null,
+                threshold: 0.1
+            });
             
-            icon.classList.replace(
-                currentTheme === 'dark' ? 'fa-sun' : 'fa-moon',
-                currentTheme === 'dark' ? 'fa-moon' : 'fa-sun'
-            );
+            document.querySelectorAll('.card:not(.animate__animated)').forEach(card => {
+                observer.observe(card);
+            });
         });
     </script>
     {% block scripts %}{% endblock %}

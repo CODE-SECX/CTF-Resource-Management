@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-4">CTF Resources</h1>
+            <p class="lead">Browse our collection of CTF tools, write-ups, and references to level up your CTF skills.</p>
+        </div>
+        <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+            <div class="dropdown me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="resourceMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cog me-2"></i> Manage
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="resourceMenu">
+                    <li><a class="dropdown-item" href="{{ url_for('category_management') }}">
+                        <i class="fas fa-tags me-2"></i> Manage Categories
+                    </a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('add_resource_page') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Add Resource
+            </a>
+        </div>
+    </div>
+
+    <!-- Popular tags -->
+    <div class="mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Popular Tags</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for tag in popular_tags %}
+                        <a href="#" class="badge bg-secondary text-decoration-none tag-badge" data-tag="{{ tag }}">
+                            {{ tag }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources list -->
+    <div class="row mb-4" id="resourcesList">
+        <div class="col-12 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Filter Resources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search resources...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="categoryFilter">
+                                <option value="all">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.slug }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="sortOrder">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="views">Most Viewed</option>
+                                <option value="ratings">Highest Rated</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% for resource in resources %}
+        <div class="col-md-6 col-lg-4 mb-4 resource-card" 
+             data-category="{{ resource.category }}" 
+             data-tags="{{ resource.tags|join(',') }}" 
+             data-date="{{ resource.date_added }}"
+             data-views="{{ resource.views|default(0) }}"
+             data-rating="{{ resource.rating|default(0) }}">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    {% for category in categories %}
+                        {% if category.slug == resource.category %}
+                            <span class="badge bg-primary">
+                                <i class="{{ category.icon }}"></i> {{ category.name }}
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                    <small class="text-muted">Added {{ resource.date_added|datetime }}</small>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ resource.name }}</h5>
+                    <p class="card-text">{{ resource.description|truncate(150) }}</p>
+                    
+                    <div class="mb-3 tags-container">
+                        {% for tag in resource.tags %}
+                            <span class="badge bg-secondary me-1 tag-badge" data-tag="{{ tag }}">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="me-2"><i class="fas fa-eye"></i> {{ resource.views|default(0) }}</span>
+                            {% if resource.rating|default(0) > 0 %}
+                                <span><i class="fas fa-star"></i> {{ "%.1f"|format(resource.rating) }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('resource_details', resource_id=resource.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i> View Details
+                        </a>
+                        <div>
+                            <a href="{{ url_for('edit_resource', resource_id=resource.id) }}" class="btn btn-sm btn-secondary me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ resource.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal{{ resource.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete "{{ resource.name }}"?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('delete_resource', resource_id=resource.id) }}" method="post">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% if not resources %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No resources have been added yet.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set the resources nav item as active
+    document.getElementById('nav-browse').classList.add('active');
+    
+    // Tag click handling
+    document.querySelectorAll('.tag-badge').forEach(badge => {
+        badge.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tag = this.dataset.tag;
+            document.getElementById('searchInput').value = tag;
+            filterResources();
+        });
+    });
+    
+    // Filtering functionality
+    const resourceCards = document.querySelectorAll('.resource-card');
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortOrder = document.getElementById('sortOrder');
+    
+    function filterResources() {
+        const searchValue = searchInput.value.toLowerCase();
+        const categoryValue = categoryFilter.value;
+        
+        resourceCards.forEach(card => {
+            const cardTags = card.dataset.tags.toLowerCase();
+            const cardCategory = card.dataset.category;
+            const cardTitle = card.querySelector('.card-title').textContent.toLowerCase();
+            const cardDesc = card.querySelector('.card-text').textContent.toLowerCase();
+            
+            const matchesSearch = searchValue === '' || 
+                                 cardTags.includes(searchValue) || 
+                                 cardTitle.includes(searchValue) || 
+                                 cardDesc.includes(searchValue);
+                                 
+            const matchesCategory = categoryValue === 'all' || cardCategory === categoryValue;
+            
+            card.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
+        });
+        
+        sortResources();
+    }
+    
+    function sortResources() {
+        const sortValue = sortOrder.value;
+        const resourceList = document.getElementById('resourcesList');
+        const cards = Array.from(resourceCards).filter(card => card.style.display !== 'none');
+        
+        cards.sort((a, b) => {
+            if (sortValue === 'newest') {
+                return new Date(b.dataset.date) - new Date(a.dataset.date);
+            } else if (sortValue === 'oldest') {
+                return new Date(a.dataset.date) - new Date(b.dataset.date);
+            } else if (sortValue === 'views') {
+                return parseInt(b.dataset.views) - parseInt(a.dataset.views);
+            } else if (sortValue === 'ratings') {
+                return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+            }
+            return 0;
+        });
+        
+        // Reattach sorted cards
+        cards.forEach(card => {
+            resourceList.appendChild(card);
+        });
+    }
+    
+    searchInput.addEventListener('input', filterResources);
+    categoryFilter.addEventListener('change', filterResources);
+    sortOrder.addEventListener('change', sortResources);
+    
+    // Initial sort
+    sortResources();
+});
+</script>
+{% endblock %}

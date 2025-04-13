@@ -44,7 +44,7 @@
                             <label for="description" class="form-label fw-bold">Resource Description</label>
                             <p class="text-muted small mb-2">Use the rich text editor below to create detailed content with formatting, links, images, and more.</p>
                             <div class="editor-container" style="min-height: 500px; border: 1px solid var(--border-color); border-radius: 4px;">
-                                <textarea id="description" name="description" style="min-height: 500px;"></textarea>
+                                <textarea id="editor" name="description"></textarea>
                             </div>
                         </div>
                         
@@ -71,51 +71,113 @@
 
 {% block scripts %}
 <!-- TinyMCE CDN Script -->
-<script src="https://cdn.tiny.cloud/1/no17idvqooop2hz590huxkpthgsoutf3f5kb89qobgl0dkfl/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.tiny.cloud/1/no17idvqooop2hz590huxkpthgsoutf3f5kb89qobgl0dkfl/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-    // Initialize TinyMCE with theme-aware configuration
     document.addEventListener('DOMContentLoaded', function() {
-        // Function to set editor theme based on site theme
-        function updateEditorTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
+        let tinymceInitialized = false;
+        
+        // Function to create a fallback editor if TinyMCE fails
+        function createFallbackEditor() {
+            // Create admin alert for the TinyMCE API key issue
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span class="fw-bold">TinyMCE API Key Error:</span> Using basic editor instead.
+                </div>
+                <div class="mt-2">
+                    <p><strong>Please contact the administrator to fix the TinyMCE API key issue:</strong></p>
+                    <ol>
+                        <li>Go to <a href="https://www.tiny.cloud/auth/signup/" target="_blank">TinyMCE Cloud</a> and sign up for a free account</li>
+                        <li>Create a new API key in your TinyMCE Cloud dashboard</li>
+                        <li>Add your domain (including localhost) to the allowed domains in your API key settings</li>
+                        <li>Update the API key in the template file</li>
+                    </ol>
+                </div>
+            `;
             
-            // Initialize TinyMCE with appropriate theme
+            const editorContainer = document.querySelector('.editor-container');
+            editorContainer.parentNode.insertBefore(alertDiv, editorContainer);
+            
+            // Create a basic textarea as fallback
+            const editor = document.getElementById('editor');
+            editor.classList.add('form-control');
+            editor.style.display = 'block';
+            editor.style.height = '500px';
+        }
+        
+        // Check if TinyMCE is loaded
+        if (typeof tinymce === 'undefined') {
+            console.error('TinyMCE is not loaded');
+            createFallbackEditor();
+            return;
+        }
+        
+        // Initialize TinyMCE with a more robust configuration
+        try {
             tinymce.init({
-                selector: '#description',
+                selector: '#editor',
+                height: 500,
                 plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
                 toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
-                height: 600,
-                skin: currentTheme === 'dark' ? 'oxide-dark' : 'oxide',
-                content_css: currentTheme === 'dark' ? 'dark' : 'default',
+                skin: 'oxide',
+                content_css: 'default',
                 entity_encoding: 'raw',
                 promotion: false,
                 branding: false,
                 resize: true,
                 statusbar: true,
                 menubar: 'file edit view insert format tools table help',
+                read_only: false,
+                readonly: false,
+                forced_root_block: 'p',
+                paste_as_text: false,
+                paste_data_images: true,
                 setup: function(editor) {
+                    editor.on('init', function() {
+                        console.log('TinyMCE initialized successfully');
+                        tinymceInitialized = true;
+                        
+                        // Check if editor is read-only
+                        if (editor.isReadOnly()) {
+                            console.warn('Editor is read-only. This may be due to an invalid API key.');
+                            // Try to force it to be editable
+                            editor.setMode('design');
+                        }
+                    });
+                    
                     // Save content to textarea on form submit
                     editor.on('change', function() {
                         editor.save();
                     });
+                },
+                init_error: function(err) {
+                    console.error('TinyMCE initialization error:', err);
+                    createFallbackEditor();
                 }
             });
+            
+            // Set a timeout to check if TinyMCE initialized properly
+            setTimeout(function() {
+                if (!tinymceInitialized) {
+                    console.warn('TinyMCE did not initialize within expected time');
+                    createFallbackEditor();
+                }
+            }, 3000);
+        } catch (error) {
+            console.error('Error initializing TinyMCE:', error);
+            createFallbackEditor();
         }
         
-        // Initial setup
-        updateEditorTheme();
-        
-        // Update editor theme when site theme changes
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', function() {
-                // Wait for theme change to complete
-                setTimeout(function() {
-                    // Destroy existing editor
-                    tinymce.remove('#description');
-                    // Reinitialize with new theme
-                    updateEditorTheme();
-                }, 100);
+        // Handle form submission
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Make sure TinyMCE content is saved to the textarea
+                if (typeof tinymce !== 'undefined' && tinymce.get('editor')) {
+                    tinymce.get('editor').save();
+                }
             });
         }
     });

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-4">Learning Resources</h1>
+            <p class="lead">Browse through our collection of learning materials, tutorials, and courses to enhance your CTF skills.</p>
+        </div>
+        <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+            <div class="dropdown me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="learningMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-cog me-2"></i> Manage
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="learningMenu">
+                    <li><a class="dropdown-item" href="{{ url_for('learning_category_management') }}">
+                        <i class="fas fa-tags me-2"></i> Manage Categories
+                    </a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('add_learning_resource') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Add Learning Resource
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtering options -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Filter Learning Resources</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">By Category</label>
+                    <select class="form-select" id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">By Difficulty</label>
+                    <select class="form-select" id="difficultyFilter">
+                        <option value="all">All Difficulties</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by title or description...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning resources list -->
+    <div class="row" id="learningList">
+        {% if learning_resources %}
+            {% for resource in learning_resources %}
+                <div class="col-md-6 col-lg-4 mb-4 learning-item" 
+                     data-categories="{{ resource.category_ids|join(',') }}"
+                     data-difficulty="{{ resource.difficulty }}">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge {% if resource.difficulty == 'Beginner' %}bg-success{% elif resource.difficulty == 'Intermediate' %}bg-info{% elif resource.difficulty == 'Advanced' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ resource.difficulty }}
+                            </span>
+                            <small class="text-muted">Added {{ resource.date_added|datetime }}</small>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ resource.title }}</h5>
+                            <p class="card-text">{{ resource.description|truncate(100) }}</p>
+                            
+                            <div class="mb-3">
+                                {% for category_id in resource.category_ids %}
+                                    {% for category in categories %}
+                                        {% if category.id == category_id %}
+                                            <span class="badge bg-secondary me-1">
+                                                <i class="{{ category.icon }}"></i> {{ category.name }}
+                                            </span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-flex align-items-center mt-auto">
+                                <span class="me-3"><i class="fas fa-eye"></i> {{ resource.views }}</span>
+                                <span><i class="fas fa-user-check"></i> {{ resource.completed_by }}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('view_learning', learning_id=resource.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i> View
+                                </a>
+                                <div>
+                                    <a href="{{ url_for('edit_learning', learning_id=resource.id) }}" class="btn btn-sm btn-secondary me-1">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal{{ resource.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteModal{{ resource.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete "{{ resource.title }}"?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="{{ url_for('delete_learning', learning_id=resource.id) }}" method="post">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No learning resources have been added yet.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set the learning nav item as active
+    document.getElementById('nav-learning').classList.add('active');
+    
+    // Filtering functionality
+    const learningItems = document.querySelectorAll('.learning-item');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const difficultyFilter = document.getElementById('difficultyFilter');
+    const searchInput = document.getElementById('searchInput');
+    
+    function filterItems() {
+        const categoryValue = categoryFilter.value;
+        const difficultyValue = difficultyFilter.value;
+        const searchValue = searchInput.value.toLowerCase();
+        
+        learningItems.forEach(item => {
+            const categories = item.dataset.categories.split(',');
+            const difficulty = item.dataset.difficulty;
+            const title = item.querySelector('.card-title').textContent.toLowerCase();
+            const description = item.querySelector('.card-text').textContent.toLowerCase();
+            
+            const matchesCategory = categoryValue === 'all' || categories.includes(categoryValue);
+            const matchesDifficulty = difficultyValue === 'all' || difficulty === difficultyValue;
+            const matchesSearch = searchValue === '' || 
+                                title.includes(searchValue) || 
+                                description.includes(searchValue);
+            
+            if (matchesCategory && matchesDifficulty && matchesSearch) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    categoryFilter.addEventListener('change', filterItems);
+    difficultyFilter.addEventListener('change', filterItems);
+    searchInput.addEventListener('input', filterItems);
+});
+</script>
+{% endblock %}

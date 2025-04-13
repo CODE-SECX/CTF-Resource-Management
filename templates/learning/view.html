@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('learning_index') }}">Learning</a></li>
+                    <li class="breadcrumb-item active">{{ learning.title }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group">
+                <a href="{{ url_for('edit_learning', learning_id=learning.id) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-2"></i> Edit
+                </a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash me-2"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">{{ learning.title }}</h2>
+            <span class="badge {% if learning.difficulty == 'Beginner' %}bg-success{% elif learning.difficulty == 'Intermediate' %}bg-info{% elif learning.difficulty == 'Advanced' %}bg-warning{% else %}bg-danger{% endif %} ms-2">
+                {{ learning.difficulty }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="me-3"><i class="fas fa-calendar-alt"></i> Added on {{ learning.date_added|datetime }}</span>
+                    <span class="me-3"><i class="fas fa-user"></i> By {{ learning.added_by }}</span>
+                    <span class="me-3"><i class="fas fa-eye"></i> {{ learning.views }} views</span>
+                    <span><i class="fas fa-user-check"></i> {{ learning.completed_by }} completed</span>
+                </div>
+                
+                <div class="mb-3">
+                    {% for category_id in learning.category_ids %}
+                        {% for category in categories %}
+                            {% if category.id == category_id %}
+                                <span class="badge bg-secondary me-1">
+                                    <i class="{{ category.icon }}"></i> {{ category.name }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="learning-content mb-4">
+                {{ learning.description|safe }}
+            </div>
+            
+            {% if learning.url %}
+            <div class="mt-4">
+                <a href="{{ learning.url }}" target="_blank" class="btn btn-success">
+                    <i class="fas fa-external-link-alt me-2"></i> Visit Resource
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="progress-tracking">
+                    <button class="btn btn-sm {% if completed %}btn-success{% else %}btn-outline-success{% endif %}" id="markCompleted">
+                        <i class="fas {% if completed %}fa-check-circle{% else %}fa-circle{% endif %} me-2"></i>
+                        {% if completed %}Completed{% else %}Mark as Completed{% endif %}
+                    </button>
+                </div>
+                <div class="resource-sharing">
+                    <button class="btn btn-sm btn-outline-primary" id="shareResource">
+                        <i class="fas fa-share-alt me-2"></i> Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Related Learning Resources</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if related_resources %}
+                    {% for resource in related_resources %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ resource.title }}</h6>
+                                    <div class="mb-2">
+                                        <span class="badge {% if resource.difficulty == 'Beginner' %}bg-success{% elif resource.difficulty == 'Intermediate' %}bg-info{% elif resource.difficulty == 'Advanced' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ resource.difficulty }}
+                                        </span>
+                                    </div>
+                                    <a href="{{ url_for('view_learning', learning_id=resource.id) }}" class="btn btn-sm btn-primary mt-2">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <p class="text-muted">No related learning resources found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete "{{ learning.title }}"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('delete_learning', learning_id=learning.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set nav active state
+    document.getElementById('nav-learning').classList.add('active');
+    
+    // Share functionality
+    document.getElementById('shareResource').addEventListener('click', function() {
+        if (navigator.share) {
+            navigator.share({
+                title: '{{ learning.title }}',
+                text: 'Check out this learning resource on CTF Resource Hub!',
+                url: window.location.href
+            })
+            .then(() => console.log('Shared successfully'))
+            .catch((error) => console.log('Error sharing:', error));
+        } else {
+            // Copy to clipboard as fallback
+            const tempInput = document.createElement('input');
+            tempInput.value = window.location.href;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('URL copied to clipboard!', 'info');
+        }
+    });
+    
+    // Mark as completed functionality
+    document.getElementById('markCompleted').addEventListener('click', function() {
+        // In a real app, we would send an AJAX request to update the server
+        const button = this;
+        const icon = button.querySelector('i');
+        
+        if (button.classList.contains('btn-outline-success')) {
+            button.classList.remove('btn-outline-success');
+            button.classList.add('btn-success');
+            icon.classList.remove('fa-circle');
+            icon.classList.add('fa-check-circle');
+            button.innerHTML = '<i class="fas fa-check-circle me-2"></i> Completed';
+            showToast('Marked as completed!', 'success');
+        } else {
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-success');
+            icon.classList.remove('fa-check-circle');
+            icon.classList.add('fa-circle');
+            button.innerHTML = '<i class="fas fa-circle me-2"></i> Mark as Completed';
+            showToast('Marked as not completed!', 'info');
+        }
+    });
+});
+</script>
+{% endblock %}
