@@ -16,6 +16,7 @@ from collections import Counter
 import difflib
 from werkzeug.utils import secure_filename
 import uuid
+import notes
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(24)
@@ -26,7 +27,7 @@ app.config["ALLOWED_EXTENSIONS"] = {"pdf", "doc", "docx", "txt", "zip", "rar", "
 # Create uploads directory if it doesn't exist
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# Add custom filter for datetime formatting
+# Add custom filters for template rendering - REGISTER ALL FILTERS HERE BEFORE ROUTES
 @app.template_filter('datetime')
 def format_datetime(value):
     if not value:
@@ -36,6 +37,17 @@ def format_datetime(value):
         return dt.strftime("%b %d, %Y, %H:%M")
     except (ValueError, TypeError):
         return value
+
+@app.template_filter('now')
+def _jinja2_filter_now():
+    return datetime.now()
+    
+@app.template_filter('parse_date')
+def _jinja2_filter_parse_date(date_string):
+    try:
+        return datetime.strptime(date_string, '%Y-%m-%d')
+    except:
+        return datetime.now()
 
 
 # Load resources from JSON file
@@ -843,5 +855,101 @@ def learning_resource_index():
     )
 
 
-if __name__ == "__main__":
+# Notes routes
+@app.route('/notes')
+def view_notes():
+    """Main notes landing page - redirects to the notes index dashboard"""
+    return redirect(url_for('notes_index'))
+
+@app.route('/notes/all')
+def view_all_notes():
+    """View for listing all notes in the traditional list format"""
+    all_notes = notes.get_all_notes()
+    return render_template('notes.html', notes=all_notes['notes'])
+
+@app.route('/notes/index')
+def notes_index():
+    """Professional dashboard view for Notes section"""
+    all_notes = notes.get_all_notes()
+    return render_template('notes_index.html', notes=all_notes['notes'])
+
+@app.route('/notes/resources')
+def view_resource_notes():
+    resource_notes = notes.get_notes_by_category('resources')
+    return render_template('notes.html', notes=resource_notes['notes'], category='resources')
+
+@app.route('/notes/learning')
+def view_learning_notes():
+    learning_notes = notes.get_notes_by_category('learning')
+    return render_template('notes.html', notes=learning_notes['notes'], category='learning')
+
+@app.route('/notes/add', methods=['GET', 'POST'])
+def add_note():
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        category = request.form['category']
+        due_date = request.form['due_date'] if request.form['due_date'] else None
+        
+        notes.create_note(title, content, category, due_date)
+        flash('Note added successfully!', 'success')
+        return redirect(url_for('view_notes'))
+    
+    return render_template('add_note.html')
+
+@app.route('/notes/<int:note_id>')
+def view_note(note_id):
+    note = notes.get_note_by_id(note_id)
+    if note:
+        return render_template('note_detail.html', note=note)
+    flash('Note not found!', 'error')
+    return redirect(url_for('view_notes'))
+
+@app.route('/notes/<int:note_id>/edit', methods=['GET', 'POST'])
+def edit_note(note_id):
+    note = notes.get_note_by_id(note_id)
+    if not note:
+        flash('Note not found!', 'error')
+        return redirect(url_for('view_notes'))
+    
+    if request.method == 'POST':
+        updates = {
+            'title': request.form['title'],
+            'content': request.form['content'],
+            'category': request.form['category'],
+            'due_date': request.form['due_date'] if request.form['due_date'] else None
+        }
+        notes.update_note(note_id, updates)
+        flash('Note updated successfully!', 'success')
+        return redirect(url_for('view_note', note_id=note_id))
+    
+    return render_template('edit_note.html', note=note)
+
+@app.route('/notes/<int:note_id>/toggle-complete')
+def toggle_complete(note_id):
+    note = notes.toggle_note_completion(note_id)
+    if note:
+        status = 'completed' if note['completed'] else 'marked as incomplete'
+        flash(f'Note {status} successfully!', 'success')
+    else:
+        flash('Note not found!', 'error')
+    return redirect(request.referrer or url_for('view_notes'))
+
+@app.route('/notes/<int:note_id>/delete')
+def delete_note(note_id):
+    if notes.delete_note(note_id):
+        flash('Note deleted successfully!', 'success')
+    else:
+        flash('Note not found!', 'error')
+    return redirect(url_for('view_notes'))
+
+# API endpoints for AJAX operations
+@app.route('/api/notes/<int:note_id>/toggle-complete', methods=['POST'])
+def api_toggle_complete(note_id):
+    note = notes.toggle_note_completion(note_id)
+    if note:
+        return jsonify({"success": True, "note": note})
+    return jsonify({"success": False, "message": "Note not found"}), 404
+
+if __name__ == '__main__':
     app.run(debug=True)

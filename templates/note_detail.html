@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ note.title }} - CTF Resource Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-9">
+            <h1 class="mb-2">{{ note.title }}</h1>
+            <div class="d-flex align-items-center mb-3">
+                {% if note.category == 'learning' %}
+                <span class="badge bg-primary me-2">
+                    <i class="fas fa-graduation-cap"></i> Learning
+                </span>
+                {% else %}
+                <span class="badge bg-primary me-2">
+                    <i class="fas fa-folder"></i> Resources
+                </span>
+                {% endif %}
+                
+                {% if note.completed %}
+                <span class="badge bg-success me-2">Completed</span>
+                {% endif %}
+                
+                {% if note.due_date %}
+                <span class="badge bg-warning text-dark me-2">
+                    <i class="far fa-calendar-alt me-1"></i> Due: {{ note.due_date }}
+                </span>
+                {% endif %}
+                
+                <span class="text-muted ms-2">
+                    <i class="far fa-calendar me-1"></i> Created: {{ note.created_date }}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-3 text-end">
+            <a href="{{ url_for('edit_note', note_id=note.id) }}" class="btn btn-secondary me-2">
+                <i class="fas fa-edit me-1"></i> Edit
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-1"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Note Content</h5>
+                </div>
+                <div class="card-body">
+                    <div class="note-content {% if note.completed %}text-muted{% endif %}">
+                        {% if '\n' in note.content %}
+                            {% for paragraph in note.content.split('\n') %}
+                                <p>{{ paragraph }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <p>{{ note.content }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('toggle_complete', note_id=note.id) }}" class="btn {% if note.completed %}btn-outline-success{% else %}btn-success{% endif %}">
+                        {% if note.completed %}
+                            <i class="fas fa-times me-1"></i> Mark as Incomplete
+                        {% else %}
+                            <i class="fas fa-check me-1"></i> Mark as Complete
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('view_notes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Notes
+                        </a>
+                        {% if note.category == 'learning' %}
+                        <a href="{{ url_for('view_learning_notes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-graduation-cap me-2"></i> All Learning Notes
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('view_resource_notes') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-folder me-2"></i> All Resource Notes
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('add_note') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus-circle me-2"></i> Add New Note
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete "{{ note.title }}"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{{ url_for('delete_note', note_id=note.id) }}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add active class to current nav item
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        const link = item.querySelector('.nav-link');
+        if (link && link.textContent.trim().includes('Notes')) {
+            link.classList.add('active');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-4">{% if category %}{{ category|title }} {% endif %}Notes</h1>
+            <p class="lead">Keep track of upcoming topics and resources with task management and completion tracking.</p>
+        </div>
+        <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+            <div class="dropdown me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="notesMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter me-2"></i> Filter
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="notesMenu">
+                    <li><a class="dropdown-item" href="{{ url_for('view_notes') }}">
+                        <i class="fas fa-list me-2"></i> All Notes
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('view_resource_notes') }}">
+                        <i class="fas fa-folder me-2"></i> Resource Notes
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('view_learning_notes') }}">
+                        <i class="fas fa-graduation-cap me-2"></i> Learning Notes
+                    </a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('add_note') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Add Note
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters and search -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Filter Notes</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="searchNotes" placeholder="Search notes...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="showCompleted" checked>
+                        <label class="form-check-label" for="showCompleted">Show Completed</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="showDue" checked>
+                        <label class="form-check-label" for="showDue">Show Due Soon</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="sortOrder">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="due">Due Date</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if notes %}
+    <div class="row" id="notes-container">
+        {% for note in notes %}
+        <div class="col-md-4 mb-4 note-card" 
+             data-completed="{{ note.completed|lower }}" 
+             data-category="{{ note.category }}" 
+             data-date="{{ note.created_date }}"
+             data-due-date="{{ note.due_date }}">
+            <div class="card h-100 {% if note.completed %}bg-light{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    {% if note.category == 'learning' %}
+                    <span class="badge bg-primary">
+                        <i class="fas fa-graduation-cap"></i> Learning
+                    </span>
+                    {% else %}
+                    <span class="badge bg-primary">
+                        <i class="fas fa-folder"></i> Resources
+                    </span>
+                    {% endif %}
+                    <small class="text-muted">Added {{ note.created_date }}</small>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title {% if note.completed %}text-decoration-line-through{% endif %}">{{ note.title }}</h5>
+                    <p class="card-text">{{ note.content|truncate(100) }}</p>
+                    
+                    {% if note.due_date %}
+                    <div class="mt-3">
+                        <span class="badge {% if note.completed %}bg-secondary{% else %}bg-warning text-dark{% endif %}">
+                            <i class="far fa-calendar-alt me-1"></i> Due: {{ note.due_date }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('view_note', note_id=note.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i> View Details
+                        </a>
+                        <div>
+                            <a href="{{ url_for('toggle_complete', note_id=note.id) }}" class="btn btn-sm {% if note.completed %}btn-outline-success{% else %}btn-success{% endif %}" title="{% if note.completed %}Mark as incomplete{% else %}Mark as complete{% endif %}">
+                                <i class="fas {% if note.completed %}fa-times{% else %}fa-check{% endif %}"></i>
+                            </a>
+                            <a href="{{ url_for('edit_note', note_id=note.id) }}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ note.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal{{ note.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete "{{ note.title }}"?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <a href="{{ url_for('delete_note', note_id=note.id) }}" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> No notes have been added yet.
+        <a href="{{ url_for('add_note') }}">Add a note</a> to get started.
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter notes based on completed status
+    const showCompletedCheckbox = document.getElementById('showCompleted');
+    const showDueCheckbox = document.getElementById('showDue');
+    const searchInput = document.getElementById('searchNotes');
+    const sortOrder = document.getElementById('sortOrder');
+    const notesContainer = document.getElementById('notes-container');
+    
+    function filterNotes() {
+        const showCompleted = showCompletedCheckbox.checked;
+        const searchText = searchInput.value.toLowerCase();
+        const noteCards = document.querySelectorAll('.note-card');
+        
+        noteCards.forEach(card => {
+            const isCompleted = card.dataset.completed === 'true';
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            const content = card.querySelector('.card-text').textContent.toLowerCase();
+            
+            // Check if note matches search text
+            const matchesSearch = searchText === '' || 
+                                 title.includes(searchText) || 
+                                 content.includes(searchText);
+            
+            // Check if completed notes should be shown
+            const showBasedOnCompletionStatus = showCompleted || !isCompleted;
+            
+            // Check due date
+            let showBasedOnDueDate = true;
+            if (showDueCheckbox.checked) {
+                const dueBadge = card.querySelector('.badge.bg-warning');
+                showBasedOnDueDate = !!dueBadge || !showDueCheckbox.checked;
+            }
+            
+            // Show/hide note card
+            if (matchesSearch && showBasedOnCompletionStatus && showBasedOnDueDate) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        sortNotes();
+    }
+    
+    function sortNotes() {
+        const sortValue = sortOrder.value;
+        const cards = Array.from(document.querySelectorAll('.note-card')).filter(card => card.style.display !== 'none');
+        
+        cards.sort((a, b) => {
+            if (sortValue === 'newest') {
+                return new Date(b.dataset.date) - new Date(a.dataset.date);
+            } else if (sortValue === 'oldest') {
+                return new Date(a.dataset.date) - new Date(b.dataset.date);
+            } else if (sortValue === 'due') {
+                const aDate = a.dataset.dueDate ? new Date(a.dataset.dueDate) : new Date(9999, 11, 31);
+                const bDate = b.dataset.dueDate ? new Date(b.dataset.dueDate) : new Date(9999, 11, 31);
+                return aDate - bDate;
+            }
+            return 0;
+        });
+        
+        // Reattach sorted cards
+        cards.forEach(card => {
+            notesContainer.appendChild(card);
+        });
+    }
+    
+    // Add event listeners
+    if (showCompletedCheckbox) showCompletedCheckbox.addEventListener('change', filterNotes);
+    if (showDueCheckbox) showDueCheckbox.addEventListener('change', filterNotes);
+    if (searchInput) searchInput.addEventListener('input', filterNotes);
+    if (sortOrder) sortOrder.addEventListener('change', filterNotes);
+    
+    // Initial sort
+    sortNotes();
+});
+</script>
+{% endblock %}

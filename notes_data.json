@@ -1,0 +1,22 @@
+{
+  "notes": [
+    {
+      "id": 1,
+      "title": "Review Buffer Overflow",
+      "content": "Need to practice more examples of buffer overflow attacks",
+      "category": "learning",
+      "completed": false,
+      "created_date": "2023-09-15",
+      "due_date": "2023-09-30"
+    },
+    {
+      "id": 2,
+      "title": "Update Wireshark tool",
+      "content": "Download latest version of Wireshark for network analysis",
+      "category": "resources",
+      "completed": false,
+      "created_date": "2023-09-16",
+      "due_date": "2023-09-25"
+    }
+  ]
+}

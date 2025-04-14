@@ -14,6 +14,9 @@
                 <a href="{{ url_for('learning_index') }}" class="btn btn-outline-primary btn-lg">
                     <i class="fas fa-graduation-cap me-2"></i> Learning Center
                 </a>
+                <a class="btn btn-info btn-lg text-white" href="{{ url_for('view_notes') }}" role="button">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </a>
             </div>
         </div>
     </div>
@@ -55,14 +58,11 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <div class="feature-icon mb-3">
-                        <i class="fas fa-tag fa-3x text-primary"></i>
+                        <i class="fas fa-sticky-note fa-3x text-info"></i>
                     </div>
-                    <h3 class="h5">Categorization</h3>
-                    <p class="card-text">Organize content with customizable categories for both resources and learning materials.</p>
-                    <div class="d-flex justify-content-center gap-2 mt-2">
-                        <a href="{{ url_for('category_management') }}" class="btn btn-sm btn-outline-secondary">Resource Categories</a>
-                        <a href="{{ url_for('learning_category_management') }}" class="btn btn-sm btn-outline-secondary">Learning Categories</a>
-                    </div>
+                    <h3 class="h5">Notes & Reminders</h3>
+                    <p class="card-text">Keep track of upcoming topics and resources with task management and completion tracking.</p>
+                    <a href="{{ url_for('view_notes') }}" class="btn btn-sm btn-outline-info mt-2">View Notes</a>
                 </div>
             </div>
         </div>
@@ -74,7 +74,7 @@
             <h2 class="h3 text-center">Quick Access</h2>
         </div>
         
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-4 mb-4">
             <div class="card">
                 <div class="card-header">
                     <h3 class="h5 mb-0">Resources</h3>
@@ -110,7 +110,7 @@
             </div>
         </div>
         
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-4 mb-4">
             <div class="card">
                 <div class="card-header">
                     <h3 class="h5 mb-0">Learning Center</h3>
@@ -132,6 +132,42 @@
                         <a href="{{ url_for('learning_category_management') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="fas fa-tags me-2 text-info"></i> Manage Learning Categories
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Notes</h3>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('view_notes') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-sticky-note me-2 text-info"></i> Browse All Notes
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('view_resource_notes') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-folder me-2 text-primary"></i> Resource Notes
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('view_learning_notes') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-graduation-cap me-2 text-success"></i> Learning Notes
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('add_note') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-plus-circle me-2 text-warning"></i> Add New Note
                             </div>
                             <i class="fas fa-chevron-right"></i>
                         </a>
@@ -165,10 +201,11 @@
                         <div class="step-number me-3">2</div>
                         <div>
                             <h4 class="h5">Add Your Own Content</h4>
-                            <p>Contribute to the community by adding your own resources and learning materials.</p>
+                            <p>Contribute to the community by adding your own resources, learning materials, and notes.</p>
                             <div class="d-flex gap-2">
                                 <a href="{{ url_for('add_resource_page') }}" class="btn btn-sm btn-outline-primary">Add Resource</a>
                                 <a href="{{ url_for('add_learning_resource') }}" class="btn btn-sm btn-outline-primary">Add Learning</a>
+                                <a href="{{ url_for('add_note') }}" class="btn btn-sm btn-outline-info">Add Note</a>
                             </div>
                         </div>
                     </div>
@@ -176,11 +213,11 @@
                     <div class="d-flex">
                         <div class="step-number me-3">3</div>
                         <div>
-                            <h4 class="h5">Customize Categories</h4>
-                            <p>Create and manage custom categories to better organize your content.</p>
+                            <h4 class="h5">Manage & Organize</h4>
+                            <p>Track your progress, organize with categories, and use notes to remember important tasks.</p>
                             <div class="d-flex gap-2">
                                 <a href="{{ url_for('category_management') }}" class="btn btn-sm btn-outline-primary">Resource Categories</a>
-                                <a href="{{ url_for('learning_category_management') }}" class="btn btn-sm btn-outline-primary">Learning Categories</a>
+                                <a href="{{ url_for('view_notes') }}" class="btn btn-sm btn-outline-info">Manage Notes</a>
                             </div>
                         </div>
                     </div>
