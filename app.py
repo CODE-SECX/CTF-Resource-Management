@@ -26,6 +26,17 @@ app.config["ALLOWED_EXTENSIONS"] = {"pdf", "doc", "docx", "txt", "zip", "rar", "
 # Create uploads directory if it doesn't exist
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+# Add custom filter for datetime formatting
+@app.template_filter('datetime')
+def format_datetime(value):
+    if not value:
+        return ""
+    try:
+        dt = datetime.fromisoformat(value)
+        return dt.strftime("%b %d, %Y, %H:%M")
+    except (ValueError, TypeError):
+        return value
+
 
 # Load resources from JSON file
 def load_resources():
@@ -90,12 +101,56 @@ def get_categories():
     return data["categories"]
 
 
+# Function to get learning categories
+def get_learning_categories():
+    data = load_resources()
+    if "learning_categories" not in data:
+        data["learning_categories"] = [
+            {"id": 1, "name": "Introduction to CTF", "slug": "intro", "icon": "fas fa-flag"},
+            {"id": 2, "name": "Web Security", "slug": "web-security", "icon": "fas fa-spider"},
+            {"id": 3, "name": "Cryptography Basics", "slug": "crypto-basics", "icon": "fas fa-lock"},
+            {"id": 4, "name": "Binary Analysis", "slug": "binary", "icon": "fas fa-microchip"},
+            {"id": 5, "name": "Forensics Techniques", "slug": "forensics-tech", "icon": "fas fa-search"},
+            {"id": 6, "name": "OSINT", "slug": "osint", "icon": "fas fa-eye"}
+        ]
+        save_resources(data)
+    return data["learning_categories"]
+
+def get_all_learning_categories():
+    return get_learning_categories()
+
+
+# Process HTML content
+def process_description(description):
+    """
+    Process description content from TinyMCE editor.
+    - If it's HTML (from TinyMCE), return it directly for safe display
+    - If it's plain text or markdown, convert to HTML
+    """
+    if not description:
+        return ""
+    
+    # If content already appears to be HTML (common indicators)
+    if description.strip().startswith('<') and ('</p>' in description or '</div>' in description or '</h' in description):
+        return description
+    else:
+        # Convert markdown to HTML
+        return markdown.markdown(description)
+
+
 @app.route("/")
 def index():
+    """Main landing page with overview of all sections"""
+    return render_template("index.html")
+
+@app.route("/resources")
+def resources_page():
+    """Dedicated page for browsing CTF resources"""
     data = load_resources()
     popular_tags = get_popular_tags()
+    categories = get_categories()
     return render_template(
-        "index.html", resources=data["resources"], popular_tags=popular_tags
+        "resources.html", resources=data["resources"], popular_tags=popular_tags, categories=categories
     )
 
 
@@ -104,11 +159,9 @@ def resource_details(resource_id):
     data = load_resources()
     for resource in data["resources"]:
         if resource["id"] == resource_id:
-            # Convert markdown description to HTML if it exists
+            # Process the description for display
             if "description" in resource:
-                resource["description_html"] = markdown.markdown(
-                    resource["description"]
-                )
+                resource["description_html"] = process_description(resource["description"])
 
             # Get similar resources
             similar_resources = get_similar_resources(resource, data["resources"])
@@ -171,6 +224,7 @@ def add_resource_page():
             "tags": tags,
             "url": url,
             "description": description,
+            "description_html": process_description(description),
             "file_path": file_path,
             "date_added": datetime.now().isoformat(),
             "added_by": session.get("username", "Anonymous"),
@@ -213,7 +267,11 @@ def add_resource_api():
     new_resource["rating"] = 0
     new_resource["ratings_count"] = 0
     new_resource["views"] = 0
-
+    
+    # Process description HTML
+    if "description" in new_resource:
+        new_resource["description_html"] = process_description(new_resource["description"])
+        
     data["resources"].append(new_resource)
     save_resources(data)
     
@@ -354,6 +412,7 @@ def edit_resource(resource_id):
         resource["tags"] = tags
         resource["url"] = url
         resource["description"] = description
+        resource["description_html"] = process_description(description)
         resource["date_updated"] = datetime.now().isoformat()
         
         save_resources(data)
@@ -516,8 +575,273 @@ def content_index():
     )
 
 
+# Data access functions for Learning resources
+def get_all_learning_resources():
+    data = load_resources()
+    if "learning_resources" not in data:
+        data["learning_resources"] = []
+        save_resources(data)
+    return data["learning_resources"]
+
+def get_learning_by_id(learning_id):
+    data = load_resources()
+    for learning in data.get("learning_resources", []):
+        if learning["id"] == learning_id:
+            return learning
+    return None
+
+def add_learning_item(title, description, url, difficulty, category_ids):
+    data = load_resources()
+    
+    # Initialize learning_resources if it doesn't exist
+    if "learning_resources" not in data:
+        data["learning_resources"] = []
+    
+    # Get a new ID for the learning resource
+    learning_id = 1
+    if data["learning_resources"]:
+        learning_id = max([r["id"] for r in data["learning_resources"]]) + 1
+    
+    # Create the new learning resource
+    new_learning = {
+        "id": learning_id,
+        "title": title,
+        "description": description,
+        "url": url,
+        "difficulty": difficulty,
+        "category_ids": [int(cat_id) for cat_id in category_ids],
+        "date_added": datetime.now().isoformat(),
+        "added_by": session.get("username", "Anonymous"),
+        "views": 0,
+        "completed_by": 0
+    }
+    
+    data["learning_resources"].append(new_learning)
+    save_resources(data)
+    return learning_id
+
+def update_learning(learning_id, title, description, url, difficulty, category_ids):
+    data = load_resources()
+    for learning in data.get("learning_resources", []):
+        if learning["id"] == learning_id:
+            learning["title"] = title
+            learning["description"] = description
+            learning["url"] = url
+            learning["difficulty"] = difficulty
+            learning["category_ids"] = [int(cat_id) for cat_id in category_ids]
+            learning["date_updated"] = datetime.now().isoformat()
+            save_resources(data)
+            return True
+    return False
+
+def delete_learning_resource(learning_id):
+    data = load_resources()
+    for i, learning in enumerate(data.get("learning_resources", [])):
+        if learning["id"] == learning_id:
+            data["learning_resources"].pop(i)
+            save_resources(data)
+            return True
+    return False
+
+def get_all_categories():
+    return get_categories()
+
+
+# Learning section routes
+@app.route('/learning')
+def learning_index():
+    all_learning = get_all_learning_resources()
+    categories = get_all_learning_categories()
+    return render_template('learning/index.html', learning_resources=all_learning, categories=categories)
+
+@app.route('/learning/add', methods=['GET', 'POST'])
+def add_learning_resource():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        url = request.form.get('url')
+        difficulty = request.form.get('difficulty', 'Medium')
+        category_ids = request.form.getlist('categories')
+        
+        if not title or not description:
+            flash('Title and description are required!')
+            return redirect(url_for('add_learning_resource'))
+        
+        learning_id = add_learning_item(title, description, url, difficulty, category_ids)
+        flash('Learning resource added successfully!')
+        return redirect(url_for('learning_index'))
+    
+    categories = get_all_learning_categories()
+    return render_template('learning/add.html', categories=categories)
+
+@app.route('/learning/<int:learning_id>')
+def view_learning(learning_id):
+    learning_resource = get_learning_by_id(learning_id)
+    if not learning_resource:
+        flash('Learning resource not found!')
+        return redirect(url_for('learning_index'))
+    
+    categories = get_all_learning_categories()
+    
+    # Get related learning resources (with similar categories)
+    all_learning = get_all_learning_resources()
+    related_resources = []
+    
+    for resource in all_learning:
+        if resource['id'] != learning_id:
+            # Check for shared categories
+            shared_categories = set(resource['category_ids']).intersection(set(learning_resource['category_ids']))
+            if shared_categories:
+                related_resources.append(resource)
+    
+    # Limit related resources to top 3
+    related_resources = related_resources[:3]
+    
+    # Track the view
+    learning_resource['views'] = learning_resource.get('views', 0) + 1
+    data = load_resources()
+    save_resources(data)
+    
+    return render_template('learning/view.html', learning=learning_resource, categories=categories, related_resources=related_resources)
+
+@app.route('/learning/edit/<int:learning_id>', methods=['GET', 'POST'])
+def edit_learning(learning_id):
+    learning_resource = get_learning_by_id(learning_id)
+    if not learning_resource:
+        flash('Learning resource not found!')
+        return redirect(url_for('learning_index'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        url = request.form.get('url')
+        difficulty = request.form.get('difficulty', 'Medium')
+        category_ids = request.form.getlist('categories')
+        
+        if not title or not description:
+            flash('Title and description are required!')
+            return redirect(url_for('edit_learning', learning_id=learning_id))
+        
+        update_learning(learning_id, title, description, url, difficulty, category_ids)
+        flash('Learning resource updated successfully!')
+        return redirect(url_for('view_learning', learning_id=learning_id))
+    
+    categories = get_all_learning_categories()
+    return render_template('learning/edit.html', learning=learning_resource, categories=categories)
+
+@app.route('/learning/delete/<int:learning_id>', methods=['POST'])
+def delete_learning(learning_id):
+    if delete_learning_resource(learning_id):
+        flash('Learning resource deleted successfully!')
+    else:
+        flash('Failed to delete the learning resource.')
+    return redirect(url_for('learning_index'))
+
+
+@app.route("/learning/categories", methods=["GET", "POST"])
+def learning_category_management():
+    """Route for managing learning categories"""
+    data = load_resources()
+    categories = get_learning_categories()
+    
+    if request.method == "POST":
+        action = request.form.get("action")
+        
+        if action == "add":
+            # Add new category
+            name = request.form.get("name")
+            slug = request.form.get("slug", "").lower()
+            icon = request.form.get("icon", "fas fa-book")
+            
+            # Validate inputs
+            if not name or not slug:
+                flash("Category name and slug are required")
+                return redirect(url_for("learning_category_management"))
+            
+            # Check for duplicate slugs
+            if any(c["slug"] == slug for c in categories):
+                flash("A category with this slug already exists")
+                return redirect(url_for("learning_category_management"))
+            
+            # Add new category
+            new_id = max([c["id"] for c in categories], default=0) + 1
+            categories.append({
+                "id": new_id,
+                "name": name,
+                "slug": slug,
+                "icon": icon
+            })
+            
+            data["learning_categories"] = categories
+            save_resources(data)
+            flash("Learning category added successfully")
+            
+        elif action == "edit":
+            # Edit existing category
+            category_id = int(request.form.get("category_id"))
+            name = request.form.get("name")
+            slug = request.form.get("slug", "").lower()
+            icon = request.form.get("icon")
+            
+            # Validate inputs
+            if not name or not slug:
+                flash("Category name and slug are required")
+                return redirect(url_for("learning_category_management"))
+            
+            # Update category
+            for category in categories:
+                if category["id"] == category_id:
+                    category["name"] = name
+                    category["slug"] = slug
+                    category["icon"] = icon
+                    break
+            
+            data["learning_categories"] = categories
+            save_resources(data)
+            flash("Learning category updated successfully")
+            
+        elif action == "delete":
+            # Delete category
+            category_id = int(request.form.get("category_id"))
+            
+            # Check if category is in use
+            learning_resources = get_all_learning_resources()
+            resources_with_category = [r for r in learning_resources if category_id in r.get("category_ids", [])]
+            if resources_with_category:
+                flash(f"Cannot delete category because it is used by {len(resources_with_category)} learning resources")
+                return redirect(url_for("learning_category_management"))
+            
+            # Remove category
+            data["learning_categories"] = [c for c in categories if c["id"] != category_id]
+            save_resources(data)
+            flash("Learning category deleted successfully")
+        
+        return redirect(url_for("learning_category_management"))
+    
+    return render_template("learning/categories.html", categories=categories)
+
+
+# Load learning resources
+def load_learning_resources():
+    if os.path.exists(app.config["JSON_FILE"]):
+        with open(app.config["JSON_FILE"], "r") as f:
+            data = json.load(f)
+            if "learning_resources" not in data:
+                data["learning_resources"] = []
+            return {"resources": data["learning_resources"]}
+    return {"resources": []}
+
+@app.route("/learning/index")
+def learning_resource_index():
+    """Learning Resources Index - Browse learning resources by category"""
+    learning = load_learning_resources()
+    categories = get_learning_categories()
+    return render_template(
+        "learning/learning_index.html", 
+        learning_resources=learning["resources"], 
+        categories=categories
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-# Vercel specific configuration
-app = app

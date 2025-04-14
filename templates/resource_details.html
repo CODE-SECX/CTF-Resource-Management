@@ -1,100 +1,211 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0">{{ resource.name }}</h1>
-            <div>
-                <button class="btn btn-outline-warning favorite-btn" data-resource-id="{{ resource.id }}">
-                    <i class="fas fa-star"></i> Favorite
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="resource-actions mb-4">
+<div class="row mb-4">
+    <div class="col-md-12 animate__animated animate__fadeIn">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('content_index') }}"><i class="fas fa-sitemap"></i> Browse</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ resource.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="card mb-4 animate__animated animate__fadeIn">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-bookmark me-2"></i> {{ resource.name }}</h3>
                 <div class="btn-group">
-                    <a href="{{ url_for('edit_resource', resource_id=resource.id) }}" class="btn btn-outline-primary">
-                        <i class="fas fa-edit"></i> Edit Resource
+                    <a href="{{ url_for('edit_resource', resource_id=resource.id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-edit"></i> Edit
                     </a>
-                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteResourceModal">
-                        <i class="fas fa-trash-alt"></i> Delete Resource
+                    <button id="favoriteBtn" class="btn btn-sm btn-outline-warning" data-resource-id="{{ resource.id }}">
+                        <i class="fas fa-star"></i> <span id="favoriteText">Favorite</span>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                        <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Resource Details</h5>
-                        </div>
-                        <div class="card-body">
-                            <h4 class="card-title">{{ resource.name }}</h4>
-                            <div class="mb-3">
-                                <span class="badge bg-primary category-badge">{{ resource.category }}</span>
-                                {% if resource.is_new %}
-                                <span class="badge bg-success">New</span>
-                                {% endif %}
-                            </div>
-                            <div class="mb-3">
-                                {% for tag in resource.tags %}
-                                <span class="tag">{{ tag }}</span>
-                                {% endfor %}
-                            </div>
-                            <div class="description markdown-content mb-4">
-                                {{ resource.description_html|safe }}
-                            </div>
-                            <div class="metadata">
-                                <p><strong>Added by:</strong> {{ resource.added_by }}</p>
-                                <p><strong>Date added:</strong> {{ resource.date_added.split('T')[0] }}</p>
-                                <p><strong>Views:</strong> {{ resource.views }}</p>
-                            </div>
-                        </div>
+            <div class="card-body">
+                <div class="mb-4 category-tag-container animate__animated animate__fadeIn" style="animation-delay: 0.1s">
+                    <span class="badge bg-primary category-badge">{{ resource.category }}</span>
+                    {% for tag in resource.tags %}
+                    <span class="tag" style="--tag-animation-delay: {{ loop.index * 0.05 }}s">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+
+                {% if resource.url %}
+                <div class="mb-4 animate__animated animate__fadeIn" style="animation-delay: 0.2s">
+                    <a href="{{ resource.url }}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt me-2"></i> Visit Resource
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="markdown-content resource-content animate__animated animate__fadeIn" style="animation-delay: 0.3s">
+                    {{ resource.description_html|safe }}
+                </div>
+
+                {% if resource.file_path %}
+                <div class="mt-4 pt-3 border-top animate__animated animate__fadeIn" style="animation-delay: 0.4s">
+                    <h5><i class="fas fa-paperclip me-2"></i> Attachment</h5>
+                    <a href="{{ url_for('static', filename=resource.file_path) }}" target="_blank" class="btn btn-outline-secondary">
+                        <i class="fas fa-download me-2"></i> Download Attachment
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-muted">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="far fa-calendar-alt"></i> Added: {{ resource.date_added.split('T')[0] }}
+                        {% if resource.date_updated %}
+                        <span class="ms-3">
+                            <i class="fas fa-pencil-alt"></i> Updated: {{ resource.date_updated.split('T')[0] }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <i class="far fa-user"></i> {{ resource.added_by }}
                     </div>
                 </div>
-                
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-external-link-alt"></i> Quick Actions</h5>
-                        </div>
-                        <div class="card-body">
-                            <a href="{{ resource.url }}" target="_blank" class="btn btn-primary w-100 mb-2">
-                                <i class="fas fa-external-link-alt me-2"></i> Visit Resource
-                            </a>
-                            <button class="btn btn-outline-warning w-100 favorite-btn" data-resource-id="{{ resource.id }}">
-                                <i class="fas fa-star me-2"></i> Favorite
-                            </button>
-                        </div>
-                    </div>
+            </div>
+        </div>
 
-                    {% if similar_resources %}
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-random"></i> Similar Resources</h5>
-                        </div>
-                        <div class="card-body">
-                            {% for similar in similar_resources %}
-                            <div class="similar-resource mb-3">
-                                <a href="/resource/{{ similar.id }}" class="text-decoration-none">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <div class="fw-bold">{{ similar.name }}</div>
-                                            <div class="small text-muted">
-                                                <span class="badge bg-secondary">{{ similar.category }}</span>
-                                            </div>
-                                        </div>
-                                        <i class="fas fa-chevron-right text-muted"></i>
-                                    </div>
-                                </a>
-                            </div>
-                            {% if not loop.last %}
-                            <hr class="my-2">
-                            {% endif %}
-                            {% endfor %}
-                        </div>
+        <div class="card mb-4 animate__animated animate__fadeIn" style="animation-delay: 0.5s">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-star me-2"></i> Rate this resource</h5>
+            </div>
+            <div class="card-body">
+                <div class="rating-section text-center">
+                    <div class="rating mb-3" data-resource-id="{{ resource.id }}">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
                     </div>
-                    {% endif %}
+                    <div class="rating-display">
+                        {% if resource.ratings_count > 0 %}
+                        <div class="rating-stats">
+                            <div class="current-rating">
+                                <span class="rating-large">{{ resource.rating|round(1) }}</span>
+                                <span class="rating-max">/5</span>
+                            </div>
+                            <div class="rating-count">
+                                from {{ resource.ratings_count }} vote{{ 's' if resource.ratings_count != 1 }}
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="my-2">No ratings yet. Be the first to rate!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card mb-4 animate__animated animate__fadeInRight">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Resource Info</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="stats-circle">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="ms-3">
+                            <span class="d-block text-muted">Views</span>
+                            <span class="fw-bold">{{ resource.views }}</span>
+                        </div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="stats-circle bg-warning">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="ms-3">
+                            <span class="d-block text-muted">Rating</span>
+                            <span class="fw-bold">{{ resource.rating|round(1) }}/5</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <div class="stats-circle bg-success">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="ms-3">
+                            <span class="d-block text-muted">Added on</span>
+                            <span class="fw-bold">{{ resource.date_added.split('T')[0] }}</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mb-4 animate__animated animate__fadeInRight" style="animation-delay: 0.1s">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-link me-2"></i> Similar Resources</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if similar_resources %}
+                <ul class="list-group list-group-flush">
+                    {% for similar in similar_resources %}
+                    <a href="{{ url_for('resource_details', resource_id=similar.id) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                        <div class="resource-icon me-3">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <span class="d-block">{{ similar.name }}</span>
+                            <small class="text-muted">{{ similar.category }}</small>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="p-4 text-center">
+                    <div class="empty-state-icon mb-3">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <p class="text-muted">No similar resources found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mb-4 animate__animated animate__fadeInRight" style="animation-delay: 0.2s">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tag me-2"></i> Related Tags</h5>
+            </div>
+            <div class="card-body">
+                {% for tag in resource.tags %}
+                <a href="{{ url_for('index') }}?tag={{ tag }}" class="tag mb-2">{{ tag }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="card mb-4 animate__animated animate__fadeInRight share-card" style="animation-delay: 0.3s">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-share-alt me-2"></i> Share</h5>
+            </div>
+            <div class="card-body">
+                <div class="share-buttons">
+                    <button class="btn btn-outline-primary share-btn" id="copyLinkBtn">
+                        <i class="fas fa-link"></i>
+                    </button>
+                    <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ resource.name|urlencode }}" target="_blank" class="btn btn-outline-info share-btn">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url|urlencode }}" target="_blank" class="btn btn-outline-primary share-btn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="mailto:?subject={{ resource.name|urlencode }}&body={{ request.url|urlencode }}" class="btn btn-outline-secondary share-btn">
+                        <i class="fas fa-envelope"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -102,105 +213,438 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteResourceModal" tabindex="-1" aria-labelledby="deleteResourceModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteResourceModalLabel">Confirm Deletion</h5>
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the resource "<strong>{{ resource.name }}</strong>"?</p>
-                <p class="text-danger">This action cannot be undone!</p>
+                <div class="text-center mb-4">
+                    <div class="modal-icon text-danger mb-3">
+                        <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    </div>
+                    <h4>Are you sure?</h4>
+                    <p class="text-muted">You are about to delete this resource. This action cannot be undone.</p>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Cancel
+                </button>
                 <form action="{{ url_for('delete_resource', resource_id=resource.id) }}" method="post">
-                    <button type="submit" class="btn btn-danger">Delete Resource</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i> Delete Resource
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-.similar-resource {
-    transition: transform 0.2s;
-}
-
-.similar-resource:hover {
-    transform: translateX(5px);
-}
-
-[data-theme="dark"] .similar-resource a {
-    color: var(--text-color);
-}
-
-[data-theme="dark"] .similar-resource .text-muted {
-    color: #a0a0a0 !important;
-}
-</style>
-
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize favorite buttons
-    const favoriteButtons = document.querySelectorAll('.favorite-btn');
-    const resourceId = {{ resource.id }};
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    // Initialize rating system with animation
+    const ratingStars = document.querySelectorAll('.rating i');
+    const resourceId = document.querySelector('.rating').dataset.resourceId;
     
-    // Set initial state for all favorite buttons
-    function updateFavoriteButtons() {
-        const isFavorited = favorites.includes(resourceId);
-        favoriteButtons.forEach(button => {
-            if (isFavorited) {
-                button.classList.add('btn-warning');
-                button.classList.remove('btn-outline-warning');
-                button.innerHTML = '<i class="fas fa-star"></i> Favorited';
+    // Get current rating if exists
+    const currentRating = {{ resource.rating|default(0)|round(0)|int }};
+    updateStarsDisplay(currentRating);
+    
+    // Add event listeners for hover effects
+    ratingStars.forEach(star => {
+        star.addEventListener('mouseover', function() {
+            const rating = this.dataset.rating;
+            highlightStars(rating);
+        });
+        
+        star.addEventListener('mouseleave', function() {
+            updateStarsDisplay(currentRating);
+        });
+        
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            submitRating(resourceId, rating);
+            
+            // Add animation effect
+            this.classList.add('star-pop');
+            setTimeout(() => {
+                this.classList.remove('star-pop');
+            }, 300);
+        });
+    });
+    
+    function highlightStars(rating) {
+        ratingStars.forEach(star => {
+            const starRating = parseInt(star.dataset.rating);
+            if (starRating <= rating) {
+                star.classList.remove('far');
+                star.classList.add('fas');
+                star.classList.add('highlight');
             } else {
-                button.classList.remove('btn-warning');
-                button.classList.add('btn-outline-warning');
-                button.innerHTML = '<i class="fas fa-star"></i> Favorite';
+                star.classList.remove('fas', 'highlight');
+                star.classList.add('far');
             }
         });
     }
     
-    // Initial state update
-    updateFavoriteButtons();
-    
-    // Add click handlers
-    favoriteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const isFavorite = favorites.includes(resourceId);
-            
-            // Update localStorage
-            if (isFavorite) {
-                favorites = favorites.filter(id => id !== resourceId);
+    function updateStarsDisplay(rating) {
+        ratingStars.forEach(star => {
+            const starRating = parseInt(star.dataset.rating);
+            if (starRating <= rating) {
+                star.classList.remove('far');
+                star.classList.add('fas');
             } else {
-                favorites.push(resourceId);
+                star.classList.remove('fas');
+                star.classList.add('far');
             }
-            localStorage.setItem('favorites', JSON.stringify(favorites));
+            star.classList.remove('highlight');
+        });
+    }
+    
+    function submitRating(resourceId, rating) {
+        // Show loading indicator
+        const ratingSection = document.querySelector('.rating-section');
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'spinner-container';
+        loadingSpinner.innerHTML = '<div class="spinner"></div>';
+        ratingSection.appendChild(loadingSpinner);
+        
+        fetch(`/api/resources/${resourceId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rating: rating })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Remove loading spinner
+            loadingSpinner.remove();
             
-            // Update all favorite buttons
-            updateFavoriteButtons();
+            // Show success message
+            showToast('Rating submitted successfully!', 'success');
             
-            // Show feedback
-            const message = isFavorite ? 'Resource removed from favorites' : 'Resource added to favorites';
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-success alert-dismissible fade show';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            `;
-            document.querySelector('.container').prepend(alertDiv);
-            
-            // Auto-dismiss alert after 3 seconds
+            // Reload page to update the rating display
             setTimeout(() => {
-                const bsAlert = new bootstrap.Alert(alertDiv);
-                bsAlert.close();
-            }, 3000);
+                location.reload();
+            }, 1500);
+        })
+        .catch(error => {
+            // Remove loading spinner
+            loadingSpinner.remove();
+            
+            console.error('Error:', error);
+            showToast('Failed to submit rating. Please try again.', 'error');
+        });
+    }
+    
+    // Favorite button functionality
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const favoriteText = document.getElementById('favoriteText');
+    
+    if (favoriteBtn) {
+        const resourceId = parseInt(favoriteBtn.dataset.resourceId);
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const isFavorited = favorites.includes(resourceId);
+        
+        // Set initial state
+        if (isFavorited) {
+            favoriteBtn.classList.remove('btn-outline-warning');
+            favoriteBtn.classList.add('btn-warning');
+            favoriteText.textContent = 'Favorited';
+        }
+        
+        favoriteBtn.addEventListener('click', function() {
+            let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const isFavorited = favorites.includes(resourceId);
+            
+            if (isFavorited) {
+                // Remove from favorites
+                favorites = favorites.filter(id => id !== resourceId);
+                favoriteBtn.classList.remove('btn-warning');
+                favoriteBtn.classList.add('btn-outline-warning');
+                favoriteText.textContent = 'Favorite';
+                showToast('Removed from favorites', 'info');
+            } else {
+                // Add to favorites
+                favorites.push(resourceId);
+                favoriteBtn.classList.remove('btn-outline-warning');
+                favoriteBtn.classList.add('btn-warning');
+                favoriteText.textContent = 'Favorited';
+                showToast('Added to favorites', 'success');
+                
+                // Add heart animation
+                const heart = document.createElement('span');
+                heart.className = 'favorite-heart';
+                heart.innerHTML = '<i class="fas fa-heart"></i>';
+                document.body.appendChild(heart);
+                
+                const rect = this.getBoundingClientRect();
+                heart.style.left = rect.left + rect.width / 2 + 'px';
+                heart.style.top = rect.top + rect.height / 2 + 'px';
+                
+                setTimeout(() => heart.remove(), 1000);
+            }
+            
+            // Save updated favorites
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        });
+    }
+    
+    // Copy link button
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url)
+                .then(() => {
+                    showToast('Link copied to clipboard!', 'success');
+                    
+                    // Add animation to the button
+                    this.classList.add('btn-success');
+                    this.querySelector('i').className = 'fas fa-check';
+                    
+                    // Reset button after a moment
+                    setTimeout(() => {
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-primary');
+                        this.querySelector('i').className = 'fas fa-link';
+                    }, 2000);
+                })
+                .catch(err => {
+                    showToast('Error copying link', 'error');
+                });
+        });
+    }
+    
+    // Add animation to tags
+    document.querySelectorAll('.tag').forEach(tag => {
+        tag.addEventListener('mouseover', function() {
+            this.classList.add('tag-pulse');
+        });
+        
+        tag.addEventListener('mouseout', function() {
+            this.classList.remove('tag-pulse');
         });
     });
 });
 </script>
+
+<style>
+.resource-content {
+    line-height: 1.8;
+}
+
+.category-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tag {
+    animation: tagFadeIn 0.5s ease forwards;
+    animation-delay: var(--tag-animation-delay, 0s);
+    opacity: 0;
+}
+
+@keyframes tagFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tag-pulse {
+    animation: tagPulse 0.5s ease-in-out;
+}
+
+@keyframes tagPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.stats-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stats-circle i {
+    font-size: 1.2rem;
+}
+
+.stats-circle.bg-warning { background-color: var(--warning-color); }
+.stats-circle.bg-success { background-color: var(--success-color); }
+.stats-circle.bg-danger { background-color: var(--danger-color); }
+
+.rating {
+    font-size: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .rating {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rating i {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 0.25rem;
+    color: var(--warning-color);
+}
+
+.rating i.highlight {
+    color: var(--warning-color);
+    transform: scale(1.2);
+    text-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+}
+
+.star-pop {
+    animation: starPop 0.3s ease-in-out;
+}
+
+@keyframes starPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5) rotate(15deg); }
+    100% { transform: scale(1); }
+}
+
+.rating-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.current-rating {
+    display: flex;
+    align-items: baseline;
+}
+
+.rating-large {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--warning-color);
+}
+
+.rating-max {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+}
+
+.rating-count {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.share-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.share-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.resource-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+}
+
+.empty-state-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin: 0 auto;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.spinner-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+}
+
+[data-theme="dark"] .spinner-container {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Favorite heart animation */
+.favorite-heart {
+    position: fixed;
+    color: var(--danger-color);
+    font-size: 1.5rem;
+    z-index: 1000;
+    pointer-events: none;
+    animation: heartFloat 1s ease-out forwards;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes heartFloat {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translate(-50%, -100%) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -150%) scale(0.8);
+    }
+}
+</style>
 {% endblock %}

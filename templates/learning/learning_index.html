@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-4">Learning Resources Index</h1>
+            <p class="lead">Browse learning materials by category or difficulty level</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('add_learning_resource') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> Add Learning Resource
+            </a>
+        </div>
+    </div>
+
+    <!-- Category navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Browse by Category</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for category in categories %}
+                        <a href="#category-{{ category.slug }}" class="btn btn-outline-primary category-link">
+                            <i class="{{ category.icon }} me-2"></i> {{ category.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Difficulty level filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Filter by Difficulty</h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-success difficulty-filter" data-difficulty="Beginner">Beginner</button>
+                        <button type="button" class="btn btn-sm btn-outline-info difficulty-filter" data-difficulty="Intermediate">Intermediate</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning difficulty-filter" data-difficulty="Advanced">Advanced</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger difficulty-filter" data-difficulty="Expert">Expert</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary difficulty-filter" data-difficulty="all">All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning resources by category -->
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-12 mb-4" id="category-{{ category.slug }}">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="{{ category.icon }} me-2"></i> {{ category.name }}
+                            <span class="badge bg-primary ms-2">
+                                {% set count = namespace(value=0) %}
+                                {% for resource in learning_resources %}
+                                    {% if category.id in resource.category_ids %}
+                                        {% set count.value = count.value + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ count.value }}
+                            </span>
+                        </h5>
+                        <button class="btn btn-sm btn-outline-secondary toggle-category" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#category-{{ category.id }}-resources">
+                            <span class="show-text">Show</span>
+                            <span class="hide-text d-none">Hide</span>
+                            <i class="fas fa-chevron-down ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="collapse" id="category-{{ category.id }}-resources">
+                    <div class="card-body">
+                        <div class="row">
+                            {% set count = 0 %}
+                            {% for resource in learning_resources %}
+                                {% if category.id in resource.category_ids %}
+                                    {% set count = count + 1 %}
+                                    <div class="col-md-6 col-lg-4 mb-3 learning-item" data-difficulty="{{ resource.difficulty }}">
+                                        <div class="card h-100">
+                                            <div class="card-header">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="badge {% if resource.difficulty == 'Beginner' %}bg-success{% elif resource.difficulty == 'Intermediate' %}bg-info{% elif resource.difficulty == 'Advanced' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                        {{ resource.difficulty }}
+                                                    </span>
+                                                    <small class="text-muted">Added {{ resource.date_added|datetime }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <h6 class="card-title">{{ resource.title }}</h6>
+                                                <p class="card-text small mb-2">{{ resource.description|striptags|truncate(80) }}</p>
+                                                <div class="d-flex justify-content-between align-items-end mt-3">
+                                                    <div>
+                                                        <small class="d-block"><i class="fas fa-eye me-1"></i> {{ resource.views|default(0) }}</small>
+                                                    </div>
+                                                    <a href="{{ url_for('view_learning', learning_id=resource.id) }}" class="btn btn-sm btn-primary">View</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if count == 0 %}
+                                <div class="col-12">
+                                    <p class="text-muted">No learning resources in this category yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set active nav
+    document.getElementById('nav-learning').classList.add('active');
+    
+    // Handle category link clicks - smooth scroll and expand section
+    const categoryLinks = document.querySelectorAll('.category-link');
+    categoryLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                // Scroll to the target
+                const yOffset = -80; // Account for fixed header
+                const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+                
+                // Expand the category resources
+                const categoryId = targetId.replace('category-', '');
+                const collapseElement = document.querySelector(`#category-${categoryId}-resources`);
+                if (collapseElement) {
+                    const bsCollapse = new bootstrap.Collapse(collapseElement, {toggle: false});
+                    bsCollapse.show();
+                    
+                    // Update button text
+                    const toggleBtn = targetElement.querySelector('.toggle-category');
+                    if (toggleBtn) {
+                        toggleBtn.querySelector('.show-text').classList.add('d-none');
+                        toggleBtn.querySelector('.hide-text').classList.remove('d-none');
+                        toggleBtn.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+                    }
+                }
+                
+                // Add highlight effect
+                targetElement.classList.add('highlight');
+                setTimeout(() => {
+                    targetElement.classList.remove('highlight');
+                }, 1500);
+            }
+        });
+    });
+    
+    // Handle toggle category buttons
+    document.querySelectorAll('.toggle-category').forEach(button => {
+        button.addEventListener('click', function() {
+            const showText = this.querySelector('.show-text');
+            const hideText = this.querySelector('.hide-text');
+            const icon = this.querySelector('i');
+            
+            if (showText.classList.contains('d-none')) {
+                showText.classList.remove('d-none');
+                hideText.classList.add('d-none');
+                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            } else {
+                showText.classList.add('d-none');
+                hideText.classList.remove('d-none');
+                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            }
+        });
+    });
+    
+    // Handle difficulty filters
+    document.querySelectorAll('.difficulty-filter').forEach(button => {
+        button.addEventListener('click', function() {
+            const difficulty = this.getAttribute('data-difficulty');
+            const learningItems = document.querySelectorAll('.learning-item');
+            
+            // Update active state on buttons
+            document.querySelectorAll('.difficulty-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Filter items
+            learningItems.forEach(item => {
+                if (difficulty === 'all' || item.getAttribute('data-difficulty') === difficulty) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+/* Animations for scrolling to categories */
+@keyframes highlightFade {
+    0% { background-color: rgba(var(--bs-primary-rgb), 0.2); }
+    100% { background-color: transparent; }
+}
+
+.highlight {
+    animation: highlightFade 1.5s ease-out;
+}
+
+/* Styling for difficulty badges */
+.badge.bg-success, .badge.bg-info, .badge.bg-warning, .badge.bg-danger {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Button active states */
+.btn-outline-secondary.active, 
+.btn-outline-success.active, 
+.btn-outline-info.active, 
+.btn-outline-warning.active, 
+.btn-outline-danger.active {
+    color: white;
+}
+</style>
+{% endblock %}

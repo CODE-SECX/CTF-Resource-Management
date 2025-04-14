@@ -1,363 +1,243 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="search-box">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search resources by name, category, or tags...">
-            <div class="search-suggestions" style="display: none;"></div>
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 mb-4">CTF Resource Hub</h1>
+            <p class="lead mb-4">Your one-stop platform for CTF tools, learning materials, and resources to enhance your Capture The Flag skills.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('resources_page') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sitemap me-2"></i> Browse Resources
+                </a>
+                <a href="{{ url_for('learning_index') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-graduation-cap me-2"></i> Learning Center
+                </a>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-3">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-filter"></i> Categories</h5>
-            </div>
-            <div class="card-body">
-                <div class="list-group" id="categoryFilter">
-                    <button class="list-group-item list-group-item-action active" data-category="all">
-                        <i class="fas fa-th-large"></i> All Categories
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="favorites">
-                        <i class="fas fa-star"></i> Favorites
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="web">
-                        <i class="fas fa-globe"></i> Web Exploitation
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="crypto">
-                        <i class="fas fa-key"></i> Cryptography
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="rev">
-                        <i class="fas fa-microchip"></i> Reverse Engineering
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="pwn">
-                        <i class="fas fa-bug"></i> Binary Exploitation
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="forensics">
-                        <i class="fas fa-search"></i> Forensics
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-category="misc">
-                        <i class="fas fa-puzzle-piece"></i> Miscellaneous
-                    </button>
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="h3">Platform Features</h2>
+            <p class="text-muted">Everything you need to organize and improve your CTF skills</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-sitemap fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="h5">Resource Repository</h3>
+                    <p class="card-text">Explore curated CTF tools and references organized by categories for quick access.</p>
+                    <a href="{{ url_for('resources_page') }}" class="btn btn-sm btn-outline-primary mt-2">Browse Resources</a>
                 </div>
             </div>
         </div>
         
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistics</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled">
-                    <li class="mb-2"><i class="fas fa-book me-2"></i> <span id="totalResources">0</span> Total Resources</li>
-                    <li class="mb-2"><i class="fas fa-globe me-2"></i> <span id="webResources">0</span> Web Resources</li>
-                    <li class="mb-2"><i class="fas fa-key me-2"></i> <span id="cryptoResources">0</span> Crypto Resources</li>
-                    <li class="mb-2"><i class="fas fa-microchip me-2"></i> <span id="revResources">0</span> Rev Resources</li>
-                    <li class="mb-2"><i class="fas fa-bug me-2"></i> <span id="pwnResources">0</span> Pwn Resources</li>
-                </ul>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="h5">Learning Center</h3>
+                    <p class="card-text">Access structured learning materials to build your CTF skills from beginner to expert.</p>
+                    <a href="{{ url_for('learning_index') }}" class="btn btn-sm btn-outline-primary mt-2">Start Learning</a>
+                </div>
             </div>
         </div>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-tags"></i> Popular Tags</h5>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-tag fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="h5">Categorization</h3>
+                    <p class="card-text">Organize content with customizable categories for both resources and learning materials.</p>
+                    <div class="d-flex justify-content-center gap-2 mt-2">
+                        <a href="{{ url_for('category_management') }}" class="btn btn-sm btn-outline-secondary">Resource Categories</a>
+                        <a href="{{ url_for('learning_category_management') }}" class="btn btn-sm btn-outline-secondary">Learning Categories</a>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="popular-tags">
-                    {% for tag in popular_tags %}
-                    <span class="tag tag-sm" style="font-size: 0.8rem; margin: 0.2rem;">{{ tag }}</span>
-                    {% endfor %}
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="row mb-5">
+        <div class="col-12 mb-4">
+            <h2 class="h3 text-center">Quick Access</h2>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Resources</h3>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('resources_page') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-sitemap me-2 text-primary"></i> Browse All Resources
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('add_resource_page') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-plus-circle me-2 text-success"></i> Add New Resource
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('category_management') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-tags me-2 text-info"></i> Manage Resource Categories
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('content_index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-th-large me-2 text-warning"></i> Resource Index
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="h5 mb-0">Learning Center</h3>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('learning_index') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-graduation-cap me-2 text-primary"></i> Browse Learning Resources
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('add_learning_resource') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-plus-circle me-2 text-success"></i> Add Learning Material
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="{{ url_for('learning_category_management') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-tags me-2 text-info"></i> Manage Learning Categories
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="col-md-9">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0"><i class="fas fa-database"></i> Resources</h4>
-        </div>
-
-        <div id="resourceList">
-            {% for resource in resources %}
-            <div class="card mb-4 fade-in resource-card" data-id="{{ resource.id }}" data-category="{{ resource.category }}" data-tags="{{ resource.tags|join(',') }}">
+    <!-- Getting Started Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3 class="h4 mb-0">Getting Started</h3>
+                </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div style="cursor: pointer;" onclick="window.location.href='/resource/{{ resource.id }}'">
-                            <h5 class="card-title mb-2">{{ resource.name }}</h5>
-                            <div class="mb-2">
-                                <span class="badge bg-primary category-badge">{{ resource.category }}</span>
-                                {% if resource.is_new %}
-                                <span class="badge bg-success">New</span>
-                                {% endif %}
-                            </div>
-                            <div class="mb-3">
-                                {% for tag in resource.tags %}
-                                <span class="tag">{{ tag }}</span>
-                                {% endfor %}
-                            </div>
-                            <div class="markdown-content mb-3">
-                                {{ resource.description|truncate(200) }}
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <small class="text-muted me-3">
-                                    <i class="far fa-calendar-alt"></i> {{ resource.date_added.split('T')[0] }}
-                                </small>
-                                <small class="text-muted">
-                                    <i class="far fa-user"></i> {{ resource.added_by }}
-                                </small>
+                    <div class="d-flex mb-4">
+                        <div class="step-number me-3">1</div>
+                        <div>
+                            <h4 class="h5">Browse Available Resources</h4>
+                            <p>Explore the collection of CTF tools, references, and learning materials to find what you need.</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('resources_page') }}" class="btn btn-sm btn-outline-primary">Browse Resources</a>
+                                <a href="{{ url_for('learning_index') }}" class="btn btn-sm btn-outline-primary">Browse Learning</a>
                             </div>
                         </div>
-                        <div class="ms-3 resource-actions">
-                            {% if resource.url %}
-                            <a href="{{ resource.url }}" target="_blank" class="btn btn-outline-primary btn-sm mb-2" onclick="event.stopPropagation();">
-                                <i class="fas fa-external-link-alt"></i> Visit
-                            </a>
-                            {% endif %}
-                            <button class="btn btn-outline-warning btn-sm favorite-btn" data-resource-id="{{ resource.id }}" onclick="event.stopPropagation();">
-                                <i class="fas fa-star"></i> Favorite
-                            </button>
+                    </div>
+                    
+                    <div class="d-flex mb-4">
+                        <div class="step-number me-3">2</div>
+                        <div>
+                            <h4 class="h5">Add Your Own Content</h4>
+                            <p>Contribute to the community by adding your own resources and learning materials.</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('add_resource_page') }}" class="btn btn-sm btn-outline-primary">Add Resource</a>
+                                <a href="{{ url_for('add_learning_resource') }}" class="btn btn-sm btn-outline-primary">Add Learning</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex">
+                        <div class="step-number me-3">3</div>
+                        <div>
+                            <h4 class="h5">Customize Categories</h4>
+                            <p>Create and manage custom categories to better organize your content.</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('category_management') }}" class="btn btn-sm btn-outline-primary">Resource Categories</a>
+                                <a href="{{ url_for('learning_category_management') }}" class="btn btn-sm btn-outline-primary">Learning Categories</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const searchSuggestions = document.querySelector('.search-suggestions');
-    const resourceList = document.getElementById('resourceList');
-    const resourcesData = {{ resources|tojson|safe }};
-    let currentCategory = 'all';
-    let currentSearchQuery = '';
-    let searchTimeout;
-
-    // Update statistics
-    function updateStatistics() {
-        document.getElementById('totalResources').textContent = resourcesData.length;
-        document.getElementById('webResources').textContent = resourcesData.filter(r => r.category === 'web').length;
-        document.getElementById('cryptoResources').textContent = resourcesData.filter(r => r.category === 'crypto').length;
-        document.getElementById('revResources').textContent = resourcesData.filter(r => r.category === 'rev').length;
-        document.getElementById('pwnResources').textContent = resourcesData.filter(r => r.category === 'pwn').length;
+<style>
+    .feature-icon {
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    updateStatistics();
-
-    // Get favorites from localStorage
-    function getFavorites() {
-        return JSON.parse(localStorage.getItem('favorites') || '[]');
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--secondary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        flex-shrink: 0;
     }
+</style>
 
-    // Save favorites to localStorage
-    function saveFavorites(favorites) {
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-    }
-
-    // Update favorite button states
-    function updateFavoriteButtons() {
-        const favorites = getFavorites();
-        document.querySelectorAll('.favorite-btn').forEach(button => {
-            const resourceId = button.getAttribute('data-resource-id');
-            const isFavorited = favorites.includes(parseInt(resourceId));
-            
-            if (isFavorited) {
-                button.classList.add('btn-warning');
-                button.classList.remove('btn-outline-warning');
-                button.innerHTML = '<i class="fas fa-star"></i> Favorited';
-            } else {
-                button.classList.remove('btn-warning');
-                button.classList.add('btn-outline-warning');
-                button.innerHTML = '<i class="fas fa-star"></i> Favorite';
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set the home nav item as active
+    document.getElementById('nav-home').classList.add('active');
+    
+    // Animate cards on scroll
+    const animateOnScroll = (entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                observer.unobserve(entry.target);
             }
         });
-    }
-
-    function filterAndDisplayResources() {
-        const cards = document.querySelectorAll('#resourceList .card');
-        const favorites = getFavorites();
-        
-        cards.forEach(card => {
-            const resourceId = parseInt(card.querySelector('.favorite-btn').dataset.resourceId);
-            const category = card.dataset.category;
-            const tags = card.dataset.tags.split(',');
-            const title = card.querySelector('.card-title').textContent.toLowerCase();
-            
-            let matchesCategory = true;
-            if (currentCategory === 'favorites') {
-                matchesCategory = favorites.includes(resourceId);
-            } else if (currentCategory !== 'all') {
-                matchesCategory = category.toLowerCase() === currentCategory.toLowerCase();
-            }
-            
-            const matchesSearch = !currentSearchQuery || 
-                                title.includes(currentSearchQuery) ||
-                                tags.some(tag => tag.toLowerCase().includes(currentSearchQuery));
-            
-            card.style.display = matchesCategory && matchesSearch ? '' : 'none';
-        });
-    }
-
-    // Search input handler with debounce
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            currentSearchQuery = this.value.toLowerCase();
-            
-            // Clear previous timeout
-            clearTimeout(searchTimeout);
-            
-            // Set new timeout
-            searchTimeout = setTimeout(() => {
-                if (currentSearchQuery.length < 2) {
-                    searchSuggestions.style.display = 'none';
-                    filterAndDisplayResources();
-                    return;
-                }
-
-                filterAndDisplayResources();
-            }, 300); // 300ms debounce
-        });
-    }
-
-    // Handle category filter clicks
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-        categoryFilter.addEventListener('click', function(e) {
-            if (e.target.classList.contains('list-group-item-action')) {
-                // Remove active class from all buttons
-                document.querySelectorAll('#categoryFilter .list-group-item-action').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                
-                // Add active class to clicked button
-                e.target.classList.add('active');
-                
-                // Update current category
-                currentCategory = e.target.dataset.category;
-                
-                // Filter resources
-                filterAndDisplayResources();
-            }
-        });
-    }
-
-    // Handle favorite buttons
-    document.querySelectorAll('.favorite-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const resourceId = parseInt(this.dataset.resourceId);
-            let favorites = getFavorites();
-            const isFavorited = favorites.includes(resourceId);
-            
-            if (isFavorited) {
-                // Remove from favorites
-                favorites = favorites.filter(id => id !== resourceId);
-            } else {
-                // Add to favorites
-                favorites.push(resourceId);
-            }
-            
-            // Save updated favorites
-            saveFavorites(favorites);
-            
-            // Update UI
-            updateFavoriteButtons();
-            
-            // If in favorites view, update displayed resources
-            if (currentCategory === 'favorites') {
-                filterAndDisplayResources();
-            }
-            
-            // Show feedback to user
-            const message = isFavorited ? 'Resource removed from favorites' : 'Resource added to favorites';
-            showToast(message, 'success');
-        });
+    };
+    
+    const observer = new IntersectionObserver(animateOnScroll, {
+        root: null,
+        threshold: 0.1
     });
-
-    // Show toast notification
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = message;
-        toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
-        toast.style.right = '20px';
-        toast.style.padding = '10px 20px';
-        toast.style.backgroundColor = type === 'success' ? '#d4edda' : '#cce5ff';
-        toast.style.borderColor = type === 'success' ? '#c3e6cb' : '#b8daff';
-        toast.style.color = type === 'success' ? '#155724' : '#004085';
-        toast.style.borderRadius = '4px';
-        toast.style.zIndex = '1050';
-        document.body.appendChild(toast);
-        
-        // Auto-dismiss after 3 seconds
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
-
-    // Initialize
-    updateFavoriteButtons();
-    filterAndDisplayResources();
+    
+    document.querySelectorAll('.card').forEach(card => {
+        observer.observe(card);
+    });
 });
 </script>
-
-<style>
-.tag-sm {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
-    margin: 0.2rem;
-    display: inline-block;
-}
-
-/* Toast notification styles */
-.toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    z-index: 1000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.3s ease-out;
-}
-
-.toast.success {
-    border-left: 4px solid #28a745;
-}
-
-.toast.error {
-    border-left: 4px solid #dc3545;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-[data-theme="dark"] .toast {
-    background-color: var(--card-bg);
-    border-color: var(--border-color);
-    color: var(--text-color);
-}
-</style>
 {% endblock %}

@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 mb-4">Learning Categories Management</h1>
+            <p class="lead">Manage categories for learning resources</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left column: Existing categories -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Existing Learning Categories</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if categories %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Icon</th>
+                                        <th>Name</th>
+                                        <th>Slug</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for category in categories %}
+                                    <tr>
+                                        <td><i class="{{ category.icon }}"></i></td>
+                                        <td>{{ category.name }}</td>
+                                        <td><code>{{ category.slug }}</code></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary edit-category-btn" 
+                                                    data-id="{{ category.id }}"
+                                                    data-name="{{ category.name }}"
+                                                    data-slug="{{ category.slug }}"
+                                                    data-icon="{{ category.icon }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger delete-category-btn" 
+                                                    data-id="{{ category.id }}"
+                                                    data-name="{{ category.name }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info m-3">
+                            <i class="fas fa-info-circle me-2"></i> No categories have been created yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right column: Add new category -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Add New Learning Category</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('learning_category_management') }}" id="add-category-form">
+                        <input type="hidden" name="action" value="add">
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Category Name*</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug*</label>
+                            <input type="text" class="form-control" id="slug" name="slug" required pattern="[a-z0-9-]+">
+                            <small class="text-muted">Unique identifier (lowercase, no spaces)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="icon" class="form-label">Icon Class</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i id="icon-preview" class="fas fa-book"></i></span>
+                                <input type="text" class="form-control" id="icon" name="icon" value="fas fa-book">
+                            </div>
+                            <small class="text-muted">FontAwesome icon class (e.g., fas fa-book)</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i> Add Category
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Icon Reference</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-book fa-2x"></i>
+                            </div>
+                            <small>fa-book</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-code fa-2x"></i>
+                            </div>
+                            <small>fa-code</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-laptop-code fa-2x"></i>
+                            </div>
+                            <small>fa-laptop-code</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-graduation-cap fa-2x"></i>
+                            </div>
+                            <small>fa-graduation-cap</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-video fa-2x"></i>
+                            </div>
+                            <small>fa-video</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-flag fa-2x"></i>
+                            </div>
+                            <small>fa-flag</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-lock fa-2x"></i>
+                            </div>
+                            <small>fa-lock</small>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="p-2 border rounded mb-2">
+                                <i class="fas fa-microchip fa-2x"></i>
+                            </div>
+                            <small>fa-microchip</small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="https://fontawesome.com/icons" target="_blank" class="text-decoration-none">
+                            <i class="fas fa-external-link-alt me-1"></i> Browse all icons
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('learning_category_management') }}" id="edit-category-form">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="category_id" id="edit-category-id">
+                    
+                    <div class="mb-3">
+                        <label for="edit-name" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="edit-name" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit-slug" class="form-label">Category Slug</label>
+                        <input type="text" class="form-control" id="edit-slug" name="slug" pattern="[a-z0-9-]+" required>
+                        <div class="form-text">Short identifier used in URLs (lowercase, no spaces)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit-icon" class="form-label">Icon</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i id="edit-icon-preview" class="fas fa-folder"></i></span>
+                            <input type="text" class="form-control" id="edit-icon" name="icon">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Category Modal -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCategoryModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the category "<span id="delete-category-name"></span>"?</p>
+                <p class="text-danger">This action cannot be undone!</p>
+                <p>Note: Categories that are in use by learning resources cannot be deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('learning_category_management') }}">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="category_id" id="delete-category-id">
+                    <button type="submit" class="btn btn-danger">Delete Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set nav active state
+    document.getElementById('nav-learning').classList.add('active');
+    
+    // Auto-generate slug from name
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+    
+    if (nameInput && slugInput) {
+        nameInput.addEventListener('input', function() {
+            // Convert to lowercase, replace spaces with hyphens, remove special chars
+            slugInput.value = this.value.toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with hyphens
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars except hyphens
+                .replace(/\-\-+/g, '-')         // Replace multiple hyphens with single hyphen
+                .replace(/^-+/, '')             // Trim hyphens from start
+                .replace(/-+$/, '');            // Trim hyphens from end
+        });
+    }
+    
+    // Icon preview
+    const iconInput = document.getElementById('icon');
+    const iconPreview = document.getElementById('icon-preview');
+    
+    if (iconInput && iconPreview) {
+        iconInput.addEventListener('input', function() {
+            // Update icon preview with new class
+            iconPreview.className = this.value;
+        });
+    }
+    
+    // Edit category
+    document.querySelectorAll('.edit-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            const slug = this.dataset.slug;
+            const icon = this.dataset.icon;
+            
+            // Populate modal fields
+            document.getElementById('edit-category-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-slug').value = slug;
+            document.getElementById('edit-icon').value = icon;
+            document.getElementById('edit-icon-preview').className = icon;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            modal.show();
+        });
+    });
+    
+    // Edit icon preview
+    const editIconInput = document.getElementById('edit-icon');
+    const editIconPreview = document.getElementById('edit-icon-preview');
+    
+    if (editIconInput && editIconPreview) {
+        editIconInput.addEventListener('input', function() {
+            // Update icon preview with new class
+            editIconPreview.className = this.value;
+        });
+    }
+    
+    // Delete category
+    document.querySelectorAll('.delete-category-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            
+            // Populate modal fields
+            document.getElementById('delete-category-id').value = id;
+            document.getElementById('delete-category-name').textContent = name;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
+            modal.show();
+        });
+    });
+});
+</script>
+{% endblock %}
