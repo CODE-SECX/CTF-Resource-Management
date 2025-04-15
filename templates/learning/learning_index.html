@@ -1,129 +1,128 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="display-5 mb-4">Learning Resources Index</h1>
-            <p class="lead">Browse learning materials by category or difficulty level</p>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ url_for('add_learning_resource') }}" class="btn btn-primary">
-                <i class="fas fa-plus-circle me-2"></i> Add Learning Resource
-            </a>
-        </div>
-    </div>
-
-    <!-- Category navigation -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Browse by Category</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        {% for category in categories %}
-                        <a href="#category-{{ category.slug }}" class="btn btn-outline-primary category-link">
-                            <i class="{{ category.icon }} me-2"></i> {{ category.name }}
-                        </a>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Difficulty level filters -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Filter by Difficulty</h5>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sm btn-outline-success difficulty-filter" data-difficulty="Beginner">Beginner</button>
-                        <button type="button" class="btn btn-sm btn-outline-info difficulty-filter" data-difficulty="Intermediate">Intermediate</button>
-                        <button type="button" class="btn btn-sm btn-outline-warning difficulty-filter" data-difficulty="Advanced">Advanced</button>
-                        <button type="button" class="btn btn-sm btn-outline-danger difficulty-filter" data-difficulty="Expert">Expert</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary difficulty-filter" data-difficulty="all">All</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Learning resources by category -->
-    <div class="row">
+<div class="resource-index-container">
+    <!-- Category Tabs Panel -->
+    <div class="categories-panel">
         {% for category in categories %}
-        <div class="col-12 mb-4" id="category-{{ category.slug }}">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="{{ category.icon }} me-2"></i> {{ category.name }}
-                            <span class="badge bg-primary ms-2">
-                                {% set count = namespace(value=0) %}
-                                {% for resource in learning_resources %}
-                                    {% if category.id in resource.category_ids %}
-                                        {% set count.value = count.value + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ count.value }}
-                            </span>
-                        </h5>
-                        <button class="btn btn-sm btn-outline-secondary toggle-category" 
-                                data-bs-toggle="collapse" 
-                                data-bs-target="#category-{{ category.id }}-resources">
-                            <span class="show-text">Show</span>
-                            <span class="hide-text d-none">Hide</span>
-                            <i class="fas fa-chevron-down ms-1"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="collapse" id="category-{{ category.id }}-resources">
-                    <div class="card-body">
-                        <div class="row">
-                            {% set count = 0 %}
-                            {% for resource in learning_resources %}
-                                {% if category.id in resource.category_ids %}
-                                    {% set count = count + 1 %}
-                                    <div class="col-md-6 col-lg-4 mb-3 learning-item" data-difficulty="{{ resource.difficulty }}">
-                                        <div class="card h-100">
-                                            <div class="card-header">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <span class="badge {% if resource.difficulty == 'Beginner' %}bg-success{% elif resource.difficulty == 'Intermediate' %}bg-info{% elif resource.difficulty == 'Advanced' %}bg-warning{% else %}bg-danger{% endif %}">
-                                                        {{ resource.difficulty }}
-                                                    </span>
-                                                    <small class="text-muted">Added {{ resource.date_added|datetime }}</small>
-                                                </div>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6 class="card-title">{{ resource.title }}</h6>
-                                                <p class="card-text small mb-2">{{ resource.description|striptags|truncate(80) }}</p>
-                                                <div class="d-flex justify-content-between align-items-end mt-3">
-                                                    <div>
-                                                        <small class="d-block"><i class="fas fa-eye me-1"></i> {{ resource.views|default(0) }}</small>
-                                                    </div>
-                                                    <a href="{{ url_for('view_learning', learning_id=resource.id) }}" class="btn btn-sm btn-primary">View</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {% if count == 0 %}
-                                <div class="col-12">
-                                    <p class="text-muted">No learning resources in this category yet.</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="category-tab {% if loop.first %}active{% endif %}" data-category="{{ category.slug }}">
+            <span class="category-icon"><i class="{{ category.icon }}"></i></span>
+            <span>{{ category.name }}</span>
         </div>
         {% endfor %}
     </div>
+    
+    <!-- Main Content Area -->
+    <div class="content-area">
+        <header>
+            <h1 class="index-title">Learning Resources</h1>
+            <p>Browse learning materials by category or difficulty level</p>
+        </header>
+        
+        <!-- Difficulty Filter -->
+        <div class="difficulty-filter-container">
+            <div class="filter-label">Filter by Difficulty:</div>
+            <div class="filter-tags" data-filter-type="difficulty">
+                <div class="filter-tag active" data-difficulty="all">All</div>
+                <div class="filter-tag" data-difficulty="Beginner">Beginner</div>
+                <div class="filter-tag" data-difficulty="Intermediate">Intermediate</div>
+                <div class="filter-tag" data-difficulty="Advanced">Advanced</div>
+                <div class="filter-tag" data-difficulty="Expert">Expert</div>
+            </div>
+        </div>
+        
+        {% for category in categories %}
+        <div class="category-content {% if loop.first %}active{% endif %}" id="{{ category.slug }}">
+            <h2 class="category-title">{{ category.name }}</h2>
+            <div class="resource-container">
+                {% set count = namespace(value=0) %}
+                {% for resource in learning_resources %}
+                    {% if category.id in resource.category_ids %}
+                        {% set count.value = count.value + 1 %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if count.value > 0 %}
+                <div class="subcategory">
+                    <div class="subcategory-header">
+                        <div class="subcategory-icon"><i class="{{ category.icon }}"></i></div>
+                        <h3 class="subcategory-title">{{ category.name }} <span class="resource-count">({{ count.value }})</span></h3>
+                        <button class="toggle-btn">▼</button>
+                    </div>
+                    
+                    <ul class="resource-list" id="{{ category.slug }}-resources">
+                        {% for resource in learning_resources %}
+                            {% if category.id in resource.category_ids %}
+                                <li class="resource-item" data-level="{{ resource.difficulty|lower }}">
+                                    <a href="{{ url_for('view_learning', learning_id=resource.id) }}" class="resource-link">{{ resource.title }}</a>
+                                    <span class="resource-meta {{ resource.difficulty|lower }}">
+                                        {{ resource.difficulty }}
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    
+                    {% if count.value > 8 %}
+                    <div class="resource-pagination" id="{{ category.slug }}-pagination">
+                        {% set total_pages = (count.value / 8)|round(0, 'ceil')|int %}
+                        {% for page in range(1, total_pages + 1) %}
+                        <div class="page-button {% if loop.first %}active{% endif %}" data-page="{{ page }}"></div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="subcategory">
+                    <div class="subcategory-header">
+                        <div class="subcategory-icon"><i class="{{ category.icon }}"></i></div>
+                        <h3 class="subcategory-title">{{ category.name }}</h3>
+                        <button class="toggle-btn">▼</button>
+                    </div>
+                    <ul class="resource-list">
+                        <li class="resource-item no-resources">
+                            <span class="resource-link">No learning resources in this category yet.</span>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Decorative Elements -->
+        <div class="decoration circle"></div>
+        <div class="decoration dots">
+            <div class="dots-pattern">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        
+        <!-- Curved Lines SVG -->
+        <svg width="300" height="400" class="curved-line" style="left: 20%; top: 40%;">
+            <path d="M10,50 Q90,90 50,150 T90,250" />
+        </svg>
+        
+        <svg width="200" height="300" class="curved-line" style="right: 10%; bottom: 20%;">
+            <path d="M10,30 Q50,10 90,50 T150,80" />
+        </svg>
+    </div>
+</div>
+
+<!-- Add Learning Resource Button (Fixed) -->
+<div class="add-resource-button">
+    <a href="{{ url_for('add_learning_resource') }}" class="btn-float">
+        <i class="fas fa-plus-circle"></i>
+    </a>
 </div>
 {% endblock %}
 
@@ -133,113 +132,786 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set active nav
     document.getElementById('nav-learning').classList.add('active');
     
-    // Handle category link clicks - smooth scroll and expand section
-    const categoryLinks = document.querySelectorAll('.category-link');
-    categoryLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
+    // Handle category tabs
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const categoryContents = document.querySelectorAll('.category-content');
+    
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active class from all tabs and contents
+            categoryTabs.forEach(t => t.classList.remove('active'));
+            categoryContents.forEach(c => c.classList.remove('active'));
             
-            if (targetElement) {
-                // Scroll to the target
-                const yOffset = -80; // Account for fixed header
-                const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({top: y, behavior: 'smooth'});
-                
-                // Expand the category resources
-                const categoryId = targetId.replace('category-', '');
-                const collapseElement = document.querySelector(`#category-${categoryId}-resources`);
-                if (collapseElement) {
-                    const bsCollapse = new bootstrap.Collapse(collapseElement, {toggle: false});
-                    bsCollapse.show();
-                    
-                    // Update button text
-                    const toggleBtn = targetElement.querySelector('.toggle-category');
-                    if (toggleBtn) {
-                        toggleBtn.querySelector('.show-text').classList.add('d-none');
-                        toggleBtn.querySelector('.hide-text').classList.remove('d-none');
-                        toggleBtn.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
-                    }
+            // Add active class to clicked tab
+            tab.classList.add('active');
+            
+            // Show corresponding content
+            const categoryId = tab.getAttribute('data-category');
+            document.getElementById(categoryId).classList.add('active');
+            
+            // Re-run animations
+            setTimeout(animateResourceItems, 100);
+        });
+    });
+    
+    // Handle subcategory toggle
+    const toggleButtons = document.querySelectorAll('.toggle-btn');
+    
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const subcategory = e.target.closest('.subcategory');
+            subcategory.classList.toggle('collapsed');
+        });
+    });
+    
+    // Animate the curvy lines for decoration
+    const curvedLines = document.querySelectorAll('.curved-line path');
+    
+    function animatePath(path) {
+        if (!path.getTotalLength) return; // Skip if not supported
+        
+        const length = path.getTotalLength();
+        
+        // Set up the starting position
+        path.style.strokeDasharray = length;
+        path.style.strokeDashoffset = length;
+        
+        // Trigger animation
+        if (path.animate) {
+            path.animate(
+                [
+                    { strokeDashoffset: length },
+                    { strokeDashoffset: 0 }
+                ],
+                {
+                    duration: 1500,
+                    fill: 'forwards',
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
                 }
-                
-                // Add highlight effect
-                targetElement.classList.add('highlight');
-                setTimeout(() => {
-                    targetElement.classList.remove('highlight');
-                }, 1500);
-            }
-        });
+            );
+        } else {
+            // Fallback for browsers that don't support animate
+            path.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            setTimeout(() => {
+                path.style.strokeDashoffset = 0;
+            }, 100);
+        }
+    }
+    
+    curvedLines.forEach(path => {
+        animatePath(path);
     });
     
-    // Handle toggle category buttons
-    document.querySelectorAll('.toggle-category').forEach(button => {
-        button.addEventListener('click', function() {
-            const showText = this.querySelector('.show-text');
-            const hideText = this.querySelector('.hide-text');
-            const icon = this.querySelector('i');
+    // Add staggered animation to resource items
+    function animateResourceItems() {
+        const resourceItems = document.querySelectorAll('.category-content.active .resource-item:not(.filtered)');
+        
+        resourceItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-10px)';
             
-            if (showText.classList.contains('d-none')) {
-                showText.classList.remove('d-none');
-                hideText.classList.add('d-none');
-                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-            } else {
-                showText.classList.add('d-none');
-                hideText.classList.remove('d-none');
-                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-            }
+            setTimeout(() => {
+                item.style.transition = 'all 0.4s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateX(0)';
+            }, 100 + (index * 50));
         });
-    });
+    }
     
-    // Handle difficulty filters
-    document.querySelectorAll('.difficulty-filter').forEach(button => {
-        button.addEventListener('click', function() {
-            const difficulty = this.getAttribute('data-difficulty');
-            const learningItems = document.querySelectorAll('.learning-item');
+    // Run animations on page load
+    animateResourceItems();
+    
+    // Handle pagination for resource lists
+    function setupPagination() {
+        const listsWithPagination = document.querySelectorAll('.resource-list');
+        const itemsPerPage = 8;
+        
+        listsWithPagination.forEach(list => {
+            const items = list.querySelectorAll('.resource-item:not(.no-resources):not(.filtered)');
+            const paginationId = list.id + '-pagination';
+            const pagination = document.getElementById(paginationId);
             
-            // Update active state on buttons
-            document.querySelectorAll('.difficulty-filter').forEach(btn => {
-                btn.classList.remove('active');
+            if (!pagination) return;
+            
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+            
+            // Show only items from current page (default to page 1)
+            showPage(list, 1, itemsPerPage);
+            
+            // Set up pagination buttons
+            const pageButtons = pagination.querySelectorAll('.page-button');
+            pageButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const page = parseInt(button.getAttribute('data-page'));
+                    
+                    // Update active button
+                    pageButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Show the selected page
+                    showPage(list, page, itemsPerPage);
+                });
             });
-            this.classList.add('active');
+        });
+        
+        // Show/hide items based on current page
+        function showPage(list, page, itemsPerPage) {
+            const items = list.querySelectorAll('.resource-item:not(.no-resources):not(.filtered)');
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
             
-            // Filter items
-            learningItems.forEach(item => {
-                if (difficulty === 'all' || item.getAttribute('data-difficulty') === difficulty) {
-                    item.style.display = '';
+            items.forEach((item, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    item.style.display = 'block';
                 } else {
                     item.style.display = 'none';
                 }
             });
+        }
+    }
+    
+    setupPagination();
+    
+    // Handle difficulty filters
+    function setupDifficultyFilters() {
+        const filterTags = document.querySelectorAll('.filter-tags[data-filter-type="difficulty"] .filter-tag');
+        
+        filterTags.forEach(filter => {
+            filter.addEventListener('click', () => {
+                const difficulty = filter.getAttribute('data-difficulty');
+                
+                // Update active state
+                filterTags.forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+                
+                // Apply filter to all resource items
+                const items = document.querySelectorAll('.resource-item:not(.no-resources)');
+                items.forEach(item => {
+                    if (difficulty === 'all' || item.getAttribute('data-level') === difficulty.toLowerCase()) {
+                        item.classList.remove('filtered');
+                        item.style.display = '';
+                    } else {
+                        item.classList.add('filtered');
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Reset pagination after filtering
+                setupPagination();
+                
+                // Re-animate visible items
+                setTimeout(animateResourceItems, 100);
+            });
+        });
+    }
+    
+    setupDifficultyFilters();
+    
+    // Create animated dots in background
+    function createAnimatedDots() {
+        const contentArea = document.querySelector('.content-area');
+        const numberOfDots = 10; // Reduced for better performance
+        
+        for (let i = 0; i < numberOfDots; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'decoration dot-float';
+            dot.style.width = Math.random() * 4 + 2 + 'px';
+            dot.style.height = dot.style.width;
+            dot.style.opacity = Math.random() * 0.15;
+            dot.style.position = 'absolute';
+            dot.style.top = Math.random() * 100 + '%';
+            dot.style.left = Math.random() * 100 + '%';
+            
+            contentArea.appendChild(dot);
+        }
+    }
+    
+    createAnimatedDots();
+    
+    // Initialize with all subcategories expanded
+    document.querySelectorAll('.subcategory').forEach(sub => {
+        // Start with all expanded
+        sub.classList.remove('collapsed');
+    });
+    
+    // Add subtle parallax effect on mouse move
+    document.addEventListener('mousemove', (e) => {
+        const decorations = document.querySelectorAll('.decoration');
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        decorations.forEach((decoration, index) => {
+            const speed = (index + 1) * 0.01;
+            const x = (mouseX - 0.5) * speed * 20;
+            const y = (mouseY - 0.5) * speed * 20;
+            
+            decoration.style.transform = `translate(${x}px, ${y}px)`;
         });
     });
 });
 </script>
 
 <style>
-/* Animations for scrolling to categories */
-@keyframes highlightFade {
-    0% { background-color: rgba(var(--bs-primary-rgb), 0.2); }
-    100% { background-color: transparent; }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Resource index specific styles */
+.resource-index-container {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    position: relative;
+    margin-top: -20px;
+    margin-bottom: -20px;
 }
 
-.highlight {
-    animation: highlightFade 1.5s ease-out;
+/* Categories Panel */
+.categories-panel {
+    width: 180px;
+    height: calc(100vh - 70px);
+    background: rgba(30, 40, 60, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-left: 30px;
+    position: sticky;
+    top: 70px;
+    border: 1px solid rgba(70, 90, 120, 0.2);
 }
 
-/* Styling for difficulty badges */
-.badge.bg-success, .badge.bg-info, .badge.bg-warning, .badge.bg-danger {
+.category-tab {
+    padding: 18px 15px;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(70, 90, 120, 0.2);
+    color: #d1d5db;
+}
+
+.category-tab.active {
+    background: rgba(var(--bs-primary-rgb), 0.3);
     font-weight: 500;
-    padding: 0.35em 0.65em;
+    color: white;
 }
 
-/* Button active states */
-.btn-outline-secondary.active, 
-.btn-outline-success.active, 
-.btn-outline-info.active, 
-.btn-outline-warning.active, 
-.btn-outline-danger.active {
+.category-tab:not(.active) {
+    opacity: 0.7;
+}
+
+.category-tab:hover:not(.active) {
+    opacity: 1;
+    background: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+.category-icon {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    color: var(--bs-primary);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-tab.active .category-icon {
+    transform: scale(1.2);
+}
+
+/* Content Area */
+.content-area {
+    flex: 1;
+    padding: 60px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(20, 30, 50, 0.4);
+    backdrop-filter: blur(10px);
+    color: #d1d5db;
+}
+
+.difficulty-filter-container {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: rgba(30, 40, 60, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(70, 90, 120, 0.2);
+}
+
+.index-title {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    position: relative;
+    display: inline-block;
     color: white;
+}
+
+.index-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--bs-danger);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.5s ease;
+}
+
+.index-title:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+header {
+    text-align: left;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 10;
+}
+
+.category-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+}
+
+.category-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-title {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    color: var(--bs-primary);
+    position: relative;
+    display: inline-block;
+}
+
+.category-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--bs-danger);
+}
+
+.resource-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.resource-count {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: normal;
+}
+
+.subcategory {
+    margin-bottom: 30px;
+    position: relative;
+    background: rgba(30, 40, 60, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    width: 100%;
+    border: 1px solid rgba(70, 90, 120, 0.2);
+}
+
+.subcategory-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(var(--bs-primary-rgb), 0.3);
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subcategory-header:hover {
+    border-bottom-color: var(--bs-primary);
+}
+
+.subcategory-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(var(--bs-primary-rgb), 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    color: var(--bs-primary);
+    font-size: 0.9rem;
+}
+
+.subcategory-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #e2e8f0;
+}
+
+.toggle-btn {
+    margin-left: auto;
+    font-size: 1rem;
+    color: var(--bs-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.subcategory.collapsed .toggle-btn {
+    transform: rotate(-90deg);
+}
+
+.resource-list {
+    list-style: none;
+    padding-left: 40px;
+    position: relative;
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-primary) transparent;
+}
+
+.resource-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.resource-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.resource-list::-webkit-scrollbar-thumb {
+    background-color: var(--bs-primary);
+    border-radius: 6px;
+    opacity: 0.3;
+}
+
+.subcategory.collapsed .resource-list,
+.subcategory.collapsed .filter-tags,
+.subcategory.collapsed .filter-label,
+.subcategory.collapsed .resource-pagination {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+}
+
+.resource-item.filtered {
+    display: none !important;
+}
+
+.resource-list::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--bs-primary) 60%, transparent);
+    opacity: 0.3;
+}
+
+.resource-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 5px;
+}
+
+.page-button {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+    border: 1px solid var(--bs-primary);
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-button.active {
+    background-color: var(--bs-primary);
+    transform: scale(1.2);
+}
+
+.filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.filter-tag {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.3);
+    color: #d1d5db;
+    user-select: none;
+}
+
+.filter-tag.active {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.filter-label {
+    font-size: 0.8rem;
+    color: #a0aec0;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.filter-label::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background-color: var(--bs-danger);
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.resource-item {
+    margin-bottom: 12px;
+    position: relative;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left;
+}
+
+.resource-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 15px;
+    width: 12px;
+    height: 2px;
+    background: var(--bs-primary);
+    opacity: 0.4;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resource-item:hover::before {
+    width: 20px;
+    opacity: 1;
+}
+
+.resource-link {
+    color: #d1d5db;
+    text-decoration: none;
+    display: inline-block;
+    padding: 6px 0;
+    font-size: 0.95rem;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    width: calc(100% - 110px);
+}
+
+.resource-link:hover {
+    color: white;
+    transform: translateX(5px);
+}
+
+.resource-link::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--bs-primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.resource-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.resource-meta {
+    position: absolute;
+    right: 10px;
+    font-size: 0.75rem;
+    color: #d1d5db;
+    padding: 2px 8px;
+    border-radius: 10px;
+    top: 8px;
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+/* Difficulty color coding */
+.resource-meta.beginner {
+    border-left: 2px solid var(--bs-success);
+}
+
+.resource-meta.intermediate {
+    border-left: 2px solid var(--bs-info);
+}
+
+.resource-meta.advanced {
+    border-left: 2px solid var(--bs-warning);
+}
+
+.resource-meta.expert {
+    border-left: 2px solid var(--bs-danger);
+}
+
+/* Decorative elements */
+.decoration {
+    position: absolute;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+.decoration.circle {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, rgba(var(--bs-primary-rgb), 0.2), rgba(var(--bs-danger-rgb), 0.2));
+    bottom: -100px;
+    left: -150px;
+}
+
+.decoration.dots {
+    top: 100px;
+    right: 60px;
+}
+
+.dots-pattern {
+    display: grid;
+    grid-template-columns: repeat(5, 6px);
+    grid-gap: 10px;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    opacity: 0.3;
+}
+
+.curved-line {
+    position: absolute;
+    stroke: var(--bs-primary);
+    stroke-width: 1.5;
+    fill: none;
+    opacity: 0.2;
+}
+
+.dot-float {
+    background-color: var(--bs-primary);
+    border-radius: 50%;
+    animation: float 15s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(10px, 10px) rotate(5deg); }
+    50% { transform: translate(-5px, 15px) rotate(-5deg); }
+    75% { transform: translate(-10px, -10px) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Add resource floating button */
+.btn-float {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--bs-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    text-decoration: none;
+}
+
+.btn-float:hover {
+    background-color: var(--bs-primary-dark);
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .resource-index-container {
+        flex-direction: column;
+    }
+    
+    header {
+        position: static;
+        margin-bottom: 20px;
+    }
+    
+    .categories-panel {
+        width: 100%;
+        height: auto;
+        margin-left: 0;
+        margin-bottom: 20px;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 10px;
+        position: static;
+    }
+    
+    .category-tab {
+        padding: 10px 15px;
+        border-bottom: none;
+        white-space: nowrap;
+    }
+    
+    .content-area {
+        padding-top: 20px;
+    }
+    
+    .btn-float {
+        width: 50px;
+        height: 50px;
+        right: 20px;
+        bottom: 20px;
+    }
 }
 </style>
 {% endblock %}
