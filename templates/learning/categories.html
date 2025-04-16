@@ -29,28 +29,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Manually added Kubernetes category -->
-                                    <tr>
-                                        <td>
-                                            <img src="https://cdn.simpleicons.org/kubernetes" width="24" height="24" alt="Kubernetes icon" style="color: #326CE5;">
-                                        </td>
-                                        <td>Kubernetes</td>
-                                        <td><code>kubernetes</code></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary edit-category-btn" 
-                                                    data-id="kubernetes"
-                                                    data-name="Kubernetes"
-                                                    data-slug="kubernetes"
-                                                    data-icon="">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger delete-category-btn" 
-                                                    data-id="kubernetes"
-                                                    data-name="Kubernetes">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
                                     {% for category in categories %}
                                     <tr>
                                         <td><i class="{{ category.icon }}"></i></td>

@@ -262,16 +262,24 @@
             "added_by": "Anonymous",
             "views": 0,
             "completed_by": 0,
-            "date_updated": "2025-04-16T20:31:16.777595"
+            "date_updated": "2025-04-17T00:17:35.140083"
+        },
+        {
+            "id": 6,
+            "title": "Deployments",
+            "description": "<p>A <strong>Kubernetes Deployment</strong> is a higher-level abstraction used to manage application updates and scaling in a controlled, automated, and reliable way. It sits above ReplicaSets and Pods in the Kubernetes hierarchy, allowing you to define what your desired application state should look like&mdash;such as how many replicas (copies) of a Pod you want running and which container image to use. When you apply a Deployment, Kubernetes ensures that the correct number of Pods are running and kept up to date. If any Pods fail, the Deployment controller replaces them automatically, maintaining the declared state without manual intervention.</p>\r\n<p>What makes Deployments particularly powerful is their support for <strong>rolling updates and rollbacks</strong>. Instead of updating all Pods at once&mdash;which could cause downtime&mdash;Deployments replace Pods <strong>gradually</strong>, minimizing service interruption. If something goes wrong during an update, you can easily <strong>roll back</strong> to a previous version. Additionally, you can <strong>pause</strong> a deployment to make multiple changes and then <strong>resume</strong> it to apply all changes together. This level of control, combined with automation and reliability, makes Deployments the standard and preferred way to manage application lifecycles in Kubernetes.</p>\r\n<p>&nbsp;</p>\r\n<p><span style=\"color: #c2e0f4;\"><strong>Deployment</strong></span><br><span style=\"color: #c2e0f4;\"><strong>&nbsp; &nbsp;\u2b07\ufe0f</strong></span><br><span style=\"color: #c2e0f4;\"><strong>Creates \u27a1\ufe0f ReplicaSet</strong></span><br><span style=\"color: #c2e0f4;\"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \u2b07\ufe0f</strong></span><br><span style=\"color: #c2e0f4;\"><strong>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Creates \u27a1\ufe0f Pods (containers)</strong></span></p>",
+            "url": "",
+            "difficulty": "Beginner",
+            "category_ids": [
+                11
+            ],
+            "date_added": "2025-04-17T00:23:21.290258",
+            "added_by": "Anonymous",
+            "views": 0,
+            "completed_by": 0
         }
     ],
     "learning_categories": [
-        {
-            "id": 1,
-            "name": "Introduction to CTF",
-            "slug": "intro",
-            "icon": "fas fa-flag"
-        },
         {
             "id": 2,
             "name": "Web Security",
@@ -324,7 +332,25 @@
             "id": 11,
             "name": "Kubernetes",
             "slug": "kubernetes",
-            "icon": "kubernetes-icon"
+            "icon": "fa-brands fa-hubspot"
+        },
+        {
+            "id": 12,
+            "name": "test",
+            "slug": "test",
+            "icon": "fas fa-book"
+        },
+        {
+            "id": 13,
+            "name": "test2",
+            "slug": "test2",
+            "icon": "fas fa-book"
+        },
+        {
+            "id": 14,
+            "name": "test3",
+            "slug": "test3",
+            "icon": "fas fa-book"
         }
     ]
 }

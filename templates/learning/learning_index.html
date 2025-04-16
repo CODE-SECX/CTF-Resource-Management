@@ -149,6 +149,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoryId = tab.getAttribute('data-category');
             document.getElementById(categoryId).classList.add('active');
             
+            // Scroll the active tab into view
+            tab.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
             // Re-run animations
             setTimeout(animateResourceItems, 100);
         });
@@ -163,6 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
             subcategory.classList.toggle('collapsed');
         });
     });
+    
+    // Check if active tab is in view on page load
+    const activeTab = document.querySelector('.category-tab.active');
+    if (activeTab) {
+        activeTab.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     
     // Animate the curvy lines for decoration
     const curvedLines = document.querySelectorAll('.curved-line path');

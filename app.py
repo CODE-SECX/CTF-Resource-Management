@@ -123,27 +123,9 @@ def get_learning_categories():
             {"id": 3, "name": "Cryptography Basics", "slug": "crypto-basics", "icon": "fas fa-lock"},
             {"id": 4, "name": "Binary Analysis", "slug": "binary", "icon": "fas fa-microchip"},
             {"id": 5, "name": "Forensics Techniques", "slug": "forensics-tech", "icon": "fas fa-search"},
-            {"id": 6, "name": "OSINT", "slug": "osint", "icon": "fas fa-eye"},
-            {"id": 7, "name": "Kubernetes", "slug": "kubernetes", "icon": "kubernetes-icon"}
+            {"id": 6, "name": "OSINT", "slug": "osint", "icon": "fas fa-eye"}
         ]
         save_resources(data)
-    else:
-        # Check if Kubernetes category exists, if not add it
-        kubernetes_exists = False
-        for category in data["learning_categories"]:
-            if category.get("slug") == "kubernetes":
-                kubernetes_exists = True
-                break
-        
-        if not kubernetes_exists:
-            new_id = max([c["id"] for c in data["learning_categories"]], default=0) + 1
-            data["learning_categories"].append({
-                "id": new_id,
-                "name": "Kubernetes",
-                "slug": "kubernetes",
-                "icon": "kubernetes-icon"
-            })
-            save_resources(data)
     
     return data["learning_categories"]
 
@@ -775,18 +757,6 @@ def learning_category_management():
     data = load_resources()
     categories = get_learning_categories()
     
-    # Ensure the Kubernetes category exists in the database
-    kubernetes_category = LearningCategory.query.filter_by(slug='kubernetes').first()
-    if not kubernetes_category:
-        kubernetes_category = LearningCategory(
-            name='Kubernetes',
-            slug='kubernetes',
-            icon='kubernetes-icon'  # This is just a placeholder, we're using an image
-        )
-        db.session.add(kubernetes_category)
-        db.session.commit()
-        flash('Kubernetes category has been automatically added to the system.', 'success')
-
     if request.method == "POST":
         action = request.form.get("action")
         
