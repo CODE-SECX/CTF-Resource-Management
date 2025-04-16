@@ -6,3 +6,5 @@ __pycache__/
 config.json/
 dependency-check/
 logs/
+package.json/
+package-lock.json

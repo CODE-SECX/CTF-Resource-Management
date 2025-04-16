@@ -55,7 +55,7 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 3,
+            "views": 4,
             "description_html": ""
         },
         {
@@ -111,6 +111,25 @@
             "ratings_count": 0,
             "views": 3,
             "description_html": "<p><code>import requests</code><br><code>import sys</code></p>\r\n<p><code>if len(sys.argv) != 2:</code><br><code>\u00a0 \u00a0 print(f\"Usage {sys.argv[0]} &lt;url&gt;\")</code><br><code>\u00a0 \u00a0 exit(1)</code></p>\r\n<p><code>url = sys.argv[1]</code><br><code>pdf1 = \"https://shattered.io/static/shattered-1.pdf\"</code><br><code>pdf2 = \"https://shattered.io/static/shattered-2.pdf\"</code></p>\r\n<p><code>print(\"[*] Getting pdf1 content\")</code><br><code>pdf1_bytes = requests.get(pdf1).content</code><br><code>print(\"[*] Getting pdf2 content\")</code><br><code>pdf2_bytes = requests.get(pdf2).content</code></p>\r\n<p><code>data = {</code><br><code>\u00a0 \u00a0 \"username\": pdf2_bytes,</code><br><code>\u00a0 \u00a0 \"pwd\": pdf1_bytes</code><br><code>}</code></p>\r\n<p><code>res = requests.post(url, data=data)</code><br><code>print(res.text)</code><br><br><br></p>"
+        },
+        {
+            "id": 7,
+            "name": "Cloud Security Resources",
+            "category": "cloud-security",
+            "tags": [
+                "cloud security",
+                "cloud ctf",
+                "cloud pentesting"
+            ],
+            "url": "",
+            "description": "<h2>Cloud Security Wiki</h2>\r\n<p><br><a href=\"https://cloudsecwiki.com/\">https://cloudsecwiki.com/</a><br><br>A comprehensive wiki aggregating cloud security resources, blogs, research articles, and tools for security researchers and developers, organized by cloud service provider. Community contributions are encouraged</p>\r\n<p>\u00a0</p>\r\n<h2>Cloud Security Podcast TV</h2>\r\n<p><a title=\"cloudsecuritypodcast.tv\" href=\"cloudsecuritypodcast.tv\" target=\"_blank\" rel=\"noopener\">cloudsecuritypodcast.tv</a></p>\r\n<p>An award-winning, vendor-neutral podcast network delivering entertaining and informative interviews, news, and practical insights on cloud security topics, including SOC, identity, runtime, and AI security. Suitable for all experience levels</p>\r\n<p>\u00a0</p>\r\n<h2>CloudSecList</h2>\r\n<p><a href=\"https://cloudseclist.com/\">https://cloudseclist.com/</a></p>\r\n<p>A weekly newsletter curated for cloud security professionals, summarizing the latest news, research, technical deep dives, tools, and major cloud provider updates, with a global readership and expert recommendations</p>\r\n<p>\u00a0</p>\r\n<h2>Hacking the Cloud</h2>\r\n<p><a href=\"https://hackingthe.cloud/\">https://hackingthe.cloud/</a></p>\r\n<p>An open-source encyclopedia of offensive and defensive cloud security techniques, tactics, and tools, contributed by the community. Covers exploitation methods, detection evasion, and defensive strategies for various cloud platforms</p>",
+            "description_html": "<h2>Cloud Security Wiki</h2>\r\n<p><br><a href=\"https://cloudsecwiki.com/\">https://cloudsecwiki.com/</a><br><br>A comprehensive wiki aggregating cloud security resources, blogs, research articles, and tools for security researchers and developers, organized by cloud service provider. Community contributions are encouraged</p>\r\n<p>\u00a0</p>\r\n<h2>Cloud Security Podcast TV</h2>\r\n<p><a title=\"cloudsecuritypodcast.tv\" href=\"cloudsecuritypodcast.tv\" target=\"_blank\" rel=\"noopener\">cloudsecuritypodcast.tv</a></p>\r\n<p>An award-winning, vendor-neutral podcast network delivering entertaining and informative interviews, news, and practical insights on cloud security topics, including SOC, identity, runtime, and AI security. Suitable for all experience levels</p>\r\n<p>\u00a0</p>\r\n<h2>CloudSecList</h2>\r\n<p><a href=\"https://cloudseclist.com/\">https://cloudseclist.com/</a></p>\r\n<p>A weekly newsletter curated for cloud security professionals, summarizing the latest news, research, technical deep dives, tools, and major cloud provider updates, with a global readership and expert recommendations</p>\r\n<p>\u00a0</p>\r\n<h2>Hacking the Cloud</h2>\r\n<p><a href=\"https://hackingthe.cloud/\">https://hackingthe.cloud/</a></p>\r\n<p>An open-source encyclopedia of offensive and defensive cloud security techniques, tactics, and tools, contributed by the community. Covers exploitation methods, detection evasion, and defensive strategies for various cloud platforms</p>",
+            "file_path": null,
+            "date_added": "2025-04-16T18:47:09.060056",
+            "added_by": "Anonymous",
+            "rating": 5.0,
+            "ratings_count": 1,
+            "views": 3
         }
     ],
     "users": [
@@ -163,6 +182,12 @@
             "name": "Miscellaneous",
             "slug": "misc",
             "icon": "fas fa-puzzle-piece"
+        },
+        {
+            "id": 9,
+            "name": "Cloud Security",
+            "slug": "cloud-security",
+            "icon": "fa-solid fa-cloud"
         }
     ],
     "learning_resources": [
@@ -223,6 +248,21 @@
             "added_by": "Anonymous",
             "views": 0,
             "completed_by": 0
+        },
+        {
+            "id": 5,
+            "title": "Replication Controller & Replicaset",
+            "description": "<p>The spec section defines what's inside the object we're creating.</p>\r\n<p><span style=\"color: #3598db;\"><strong>The replica set is in fact a process that monitor the pods.</strong></span></p>\r\n<p>Even if you have a single pod, the replication controller can help by automatically bringing up a new&nbsp;pod when the existing one fails.&nbsp;Thus, the replication controller ensures that the specified number of pods are running at all times,&nbsp;even if it's just one or 100.</p>\r\n<p>However, remember that using the file name as input will not result in the number of replicas being updated automatically in the file. In other words, the number of replicas in the replica set definition file will still be three, even though you scaled your replica set to have six replicas using the cube control scale command and the file as input.</p>\r\n<p><span style=\"color: #e67e23;\"><code>kubectl create -f replicaset-definition.yaml</code></span><br><span style=\"color: #e67e23;\"><code>kubectl get replicaset</code></span><br><span style=\"color: #e67e23;\"><code>kubectl delete replicaset myapp-replicaset</code></span><br><span style=\"color: #e67e23;\"><code>kubectl replace -f replicaset-definition.yaml</code></span><br><span style=\"color: #e67e23;\"><code>kubectl scale --replicas=6 -f replicaset-definition.yaml</code></span></p>\r\n<p>&nbsp;</p>\r\n<h4><strong>The replica set is terminating the new pod that we just created. Why??</strong></h4>\r\n<p>It's not allowing more pods with the same labels than the number of replicas configured on the replicaset. so If I've defined 3 replicas and all are running and I manually create one pod than it will be terminated.</p>\r\n<p><span style=\"color: #e67e23;\"><code>kubectl scale replicaset myapp-replicaset --replicas=2</code></span></p>\r\n<h4>For Replicaset</h4>\r\n<p><strong><span style=\"color: #ba372a;\">apiVersion: v1 (Gives an error)</span></strong></p>\r\n<p><strong><span style=\"color: #2dc26b;\">apiVersion: apps/v1</span></strong></p>\r\n<p>&nbsp;</p>\r\n<h2>Label Matching</h2>\r\n<p>&nbsp;</p>\r\n<p class=\"\" data-start=\"1997\" data-end=\"2032\"><strong data-start=\"2002\" data-end=\"2031\">two sets of labels matter</strong>:</p>\r\n<ol data-start=\"2033\" data-end=\"2112\">\r\n<li class=\"\" data-start=\"2033\" data-end=\"2074\">\r\n<p class=\"\" data-start=\"2036\" data-end=\"2074\">The labels <strong data-start=\"2047\" data-end=\"2074\">inside the Pod template</strong></p>\r\n</li>\r\n<li class=\"\" data-start=\"2075\" data-end=\"2112\">\r\n<p class=\"\" data-start=\"2078\" data-end=\"2112\">The <strong data-start=\"2082\" data-end=\"2094\">selector</strong> in the ReplicaSet</p>\r\n</li>\r\n</ol>\r\n<p class=\"\" data-start=\"2114\" data-end=\"2288\">They must match. The label at the very top of the ReplicaSet (under <code data-start=\"2182\" data-end=\"2199\">metadata.labels</code>) is optional and doesn&rsquo;t affect matching &mdash; it&rsquo;s just metadata for the ReplicaSet itself.</p>\r\n<h3>&nbsp;</h3>\r\n<h3>What if they <strong>don&rsquo;t match</strong>?</h3>\r\n<pre><code class=\"language-yaml\"><span style=\"color: #eccafa;\">apiVersion: apps/v1\r\nkind: ReplicaSet\r\nmetadata:\r\n  name: my-replicaset\r\nspec:\r\n  replicas: 3\r\n  selector:\r\n    matchLabels:\r\n      app: myapp\r\n  template:\r\n    metadata:\r\n      labels:\r\n        app: somethingelse  # \u274c This does NOT match the selector\r\n    spec:\r\n      containers:\r\n      - name: nginx\r\n        image: nginx\r\n</span></code></pre>\r\n<p>Here:</p>\r\n<ul>\r\n<li>\r\n<p>Selector is still <code>app: myapp</code></p>\r\n</li>\r\n<li>\r\n<p>Pod label is now <code>app: somethingelse</code></p>\r\n</li>\r\n</ul>\r\n<p>The ReplicaSet&nbsp;<strong>won&rsquo;t find any Pods</strong> that match its selector, so it will <strong>keep trying to create new Pods</strong>.<br>But those new Pods will still not match &mdash; it&rsquo;s a loop. It never manages them correctly.</p>",
+            "url": "",
+            "difficulty": "Beginner",
+            "category_ids": [
+                11
+            ],
+            "date_added": "2025-04-16T19:27:28.601180",
+            "added_by": "Anonymous",
+            "views": 0,
+            "completed_by": 0,
+            "date_updated": "2025-04-16T20:31:16.777595"
         }
     ],
     "learning_categories": [
@@ -279,6 +319,12 @@
             "name": "Docker",
             "slug": "docker",
             "icon": "fa-brands fa-docker"
+        },
+        {
+            "id": 11,
+            "name": "Kubernetes",
+            "slug": "kubernetes",
+            "icon": "kubernetes-icon"
         }
     ]
 }

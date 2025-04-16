@@ -14,7 +14,7 @@
                 <a href="{{ url_for('learning_index') }}" class="btn btn-outline-primary btn-lg">
                     <i class="fas fa-graduation-cap me-2"></i> Learning Center
                 </a>
-                <a class="btn btn-info btn-lg text-white" href="{{ url_for('view_notes') }}" role="button">
+                <a class="btn btn-primary btn-lg text-white" href="{{ url_for('view_notes') }}" role="button">
                     <i class="fas fa-sticky-note"></i> Notes
                 </a>
             </div>
@@ -58,11 +58,11 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <div class="feature-icon mb-3">
-                        <i class="fas fa-sticky-note fa-3x text-info"></i>
+                        <i class="fas fa-sticky-note fa-3x text-primary"></i>
                     </div>
                     <h3 class="h5">Notes & Reminders</h3>
                     <p class="card-text">Keep track of upcoming topics and resources with task management and completion tracking.</p>
-                    <a href="{{ url_for('view_notes') }}" class="btn btn-sm btn-outline-info mt-2">View Notes</a>
+                    <a href="{{ url_for('view_notes') }}" class="btn btn-sm btn-outline-primary mt-2">View Notes</a>
                 </div>
             </div>
         </div>
@@ -205,7 +205,7 @@
                             <div class="d-flex gap-2">
                                 <a href="{{ url_for('add_resource_page') }}" class="btn btn-sm btn-outline-primary">Add Resource</a>
                                 <a href="{{ url_for('add_learning_resource') }}" class="btn btn-sm btn-outline-primary">Add Learning</a>
-                                <a href="{{ url_for('add_note') }}" class="btn btn-sm btn-outline-info">Add Note</a>
+                                <a href="{{ url_for('add_note') }}" class="btn btn-sm btn-outline-primary">Add Note</a>
                             </div>
                         </div>
                     </div>
@@ -217,7 +217,7 @@
                             <p>Track your progress, organize with categories, and use notes to remember important tasks.</p>
                             <div class="d-flex gap-2">
                                 <a href="{{ url_for('category_management') }}" class="btn btn-sm btn-outline-primary">Resource Categories</a>
-                                <a href="{{ url_for('view_notes') }}" class="btn btn-sm btn-outline-info">Manage Notes</a>
+                                <a href="{{ url_for('view_notes') }}" class="btn btn-sm btn-outline-primary">Manage Notes</a>
                             </div>
                         </div>
                     </div>

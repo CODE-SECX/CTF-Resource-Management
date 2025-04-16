@@ -98,13 +98,17 @@
             `;
             
             const editorContainer = document.querySelector('.editor-container');
-            editorContainer.parentNode.insertBefore(alertDiv, editorContainer);
-            
-            // Create a basic textarea as fallback
-            const editor = document.getElementById('editor');
-            editor.classList.add('form-control');
-            editor.style.display = 'block';
-            editor.style.height = '500px';
+            if (editorContainer) {
+                editorContainer.parentNode.insertBefore(alertDiv, editorContainer);
+                
+                // Create a basic textarea as fallback
+                const editor = document.getElementById('editor');
+                if (editor) {
+                    editor.classList.add('form-control');
+                    editor.style.display = 'block';
+                    editor.style.height = '500px';
+                }
+            }
         }
         
         // Check if TinyMCE is loaded
@@ -139,11 +143,15 @@
                         console.log('TinyMCE initialized successfully');
                         tinymceInitialized = true;
                         
-                        // Check if editor is read-only
-                        if (editor.isReadOnly()) {
-                            console.warn('Editor is read-only. This may be due to an invalid API key.');
-                            // Try to force it to be editable
-                            editor.setMode('design');
+                        // Check if editor is in readonly mode using the correct method
+                        try {
+                            if (editor.mode && editor.mode.get() === 'readonly') {
+                                console.warn('Editor is in read-only mode. This may be due to an invalid API key.');
+                                // Try to force it to be editable
+                                editor.mode.set('design');
+                            }
+                        } catch (err) {
+                            console.warn('Could not check editor mode:', err);
                         }
                     });
                     
