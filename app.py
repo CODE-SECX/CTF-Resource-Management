@@ -7,9 +7,12 @@ from flask import (
     url_for,
     flash,
     session,
+    send_file,
+    Response,
 )
 import json
 import os
+import sys
 from datetime import datetime
 import markdown
 from collections import Counter
@@ -17,6 +20,47 @@ import difflib
 from werkzeug.utils import secure_filename
 import uuid
 import notes
+import io
+import html2text
+
+# Configure pdfkit with path to wkhtmltopdf if available
+try:
+    import pdfkit
+    
+    # Check if we're on Windows
+    if sys.platform.startswith('win'):
+        # Common install locations for wkhtmltopdf on Windows
+        potential_paths = [
+            r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',
+            r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe',
+            r'C:\wkhtmltopdf\bin\wkhtmltopdf.exe',
+            r'C:\wkhtmltopdf\wkhtmltopdf.exe',
+            r'C:\Program Files\wkhtmltopdf\wkhtmltopdf.exe',
+        ]
+        
+        # Try to find wkhtmltopdf executable
+        wkhtmltopdf_path = None
+        for path in potential_paths:
+            print(f"Checking for wkhtmltopdf at: {path}")
+            if os.path.exists(path):
+                wkhtmltopdf_path = path
+                print(f"Found wkhtmltopdf at: {path}")
+                break
+        
+        # Configure pdfkit with the path if found
+        if wkhtmltopdf_path:
+            pdfkit_config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+        else:
+            print("wkhtmltopdf not found in common locations")
+            pdfkit_config = None
+    else:
+        # For Linux/Mac, let pdfkit find wkhtmltopdf in PATH
+        print("Non-Windows system, looking for wkhtmltopdf in PATH")
+        pdfkit_config = None
+        
+except ImportError:
+    pdfkit = None
+    pdfkit_config = None
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(24)
@@ -951,6 +995,319 @@ def api_toggle_complete(note_id):
     if note:
         return jsonify({"success": True, "note": note})
     return jsonify({"success": False, "message": "Note not found"}), 404
+
+@app.route('/resource/<int:resource_id>/export/<format>')
+def export_resource(resource_id, format):
+    """Export a resource in various formats"""
+    data = load_resources()
+    resource = None
+    
+    # Find the resource
+    for r in data["resources"]:
+        if r["id"] == resource_id:
+            resource = r
+            break
+    
+    if not resource:
+        flash("Resource not found")
+        return redirect(url_for("index"))
+    
+    # Ensure description HTML is available
+    if "description" in resource and "description_html" not in resource:
+        resource["description_html"] = process_description(resource["description"])
+    
+    # Create export content based on format
+    if format == 'pdf':
+        # Generate HTML content for PDF
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{resource['name']}</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                h1 {{ color: #333; }}
+                .metadata {{ color: #666; margin-bottom: 20px; }}
+                .tags {{ margin: 10px 0; }}
+                .tag {{ background: #f0f0f0; padding: 3px 8px; border-radius: 3px; margin-right: 5px; }}
+                .content {{ line-height: 1.6; }}
+            </style>
+        </head>
+        <body>
+            <h1>{resource['name']}</h1>
+            <div class="metadata">
+                <p>Category: {resource['category']}</p>
+                <p>Added: {resource['date_added'].split('T')[0]}</p>
+                <p>Rating: {resource['rating']:.1f}/5 ({resource['ratings_count']} ratings)</p>
+            </div>
+            <div class="tags">
+                {' '.join([f'<span class="tag">{tag}</span>' for tag in resource['tags']])}
+            </div>
+            <hr>
+            <div class="content">
+                {resource.get('description_html', '') or resource.get('description', '')}
+            </div>
+            <hr>
+            <p>Exported from CTF Resource Management on {datetime.now().strftime('%Y-%m-%d')}</p>
+        </body>
+        </html>
+        """
+        # Generate PDF using pdfkit
+        try:
+            pdf = pdfkit.from_string(html_content, False, configuration=pdfkit_config)
+            response = Response(pdf, mimetype="application/pdf")
+            response.headers["Content-Disposition"] = f"attachment; filename={resource['name'].replace(' ', '_')}.pdf"
+            return response
+        except Exception as e:
+            app.logger.error(f"PDF generation error: {str(e)}")
+            flash("Could not generate PDF. Make sure wkhtmltopdf is installed.")
+            return redirect(url_for('resource_details', resource_id=resource_id))
+            
+    elif format == 'md':
+        # Convert HTML to Markdown if needed
+        h = html2text.HTML2Text()
+        h.ignore_links = False
+        h.body_width = 0  # No text wrapping
+        
+        # Build markdown content
+        content = resource.get('description', '')
+        if resource.get('description_html') and not content:
+            content = h.handle(resource["description_html"])
+            
+        markdown_content = f"""# {resource['name']}
+
+**Category:** {resource['category']}  
+**Added on:** {resource['date_added'].split('T')[0]}  
+**Rating:** {resource['rating']:.1f}/5 ({resource['ratings_count']} ratings)
+
+**Tags:** {', '.join(resource['tags'])}
+
+{content}
+
+---
+*Exported from CTF Resource Management on {datetime.now().strftime('%Y-%m-%d')}*
+"""
+        response = Response(markdown_content, mimetype="text/markdown")
+        response.headers["Content-Disposition"] = f"attachment; filename={resource['name'].replace(' ', '_')}.md"
+        return response
+        
+    elif format == 'html':
+        # Generate standalone HTML file
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{resource['name']}</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }}
+                h1 {{ color: #333; }}
+                .metadata {{ color: #666; margin-bottom: 20px; }}
+                .tags {{ margin: 10px 0; }}
+                .tag {{ background: #f0f0f0; padding: 3px 8px; border-radius: 3px; margin-right: 5px; display: inline-block; }}
+                .content {{ margin-top: 20px; }}
+                pre {{ background: #f8f8f8; padding: 10px; border-radius: 4px; overflow: auto; }}
+                code {{ font-family: monospace; }}
+            </style>
+        </head>
+        <body>
+            <h1>{resource['name']}</h1>
+            <div class="metadata">
+                <p>Category: {resource['category']}</p>
+                <p>Added: {resource['date_added'].split('T')[0]}</p>
+                <p>Rating: {resource['rating']:.1f}/5 ({resource['ratings_count']} ratings)</p>
+            </div>
+            <div class="tags">
+                {' '.join([f'<span class="tag">{tag}</span>' for tag in resource['tags']])}
+            </div>
+            <hr>
+            <div class="content">
+                {resource.get('description_html', '') or resource.get('description', '')}
+            </div>
+            <hr>
+            <p>Exported from CTF Resource Management on {datetime.now().strftime('%Y-%m-%d')}</p>
+        </body>
+        </html>
+        """
+        response = Response(html_content, mimetype="text/html")
+        response.headers["Content-Disposition"] = f"attachment; filename={resource['name'].replace(' ', '_')}.html"
+        return response
+    
+    elif format == 'json':
+        # Export as JSON
+        export_data = {
+            "name": resource['name'],
+            "category": resource['category'],
+            "tags": resource['tags'],
+            "description": resource.get('description', ''),
+            "url": resource.get('url', ''),
+            "date_added": resource['date_added'],
+            "rating": resource['rating'],
+            "ratings_count": resource['ratings_count']
+        }
+        response = Response(json.dumps(export_data, indent=2), mimetype="application/json")
+        response.headers["Content-Disposition"] = f"attachment; filename={resource['name'].replace(' ', '_')}.json"
+        return response
+    
+    else:
+        flash("Unsupported export format")
+        return redirect(url_for('resource_details', resource_id=resource_id))
+
+
+@app.route('/learning/<int:learning_id>/export/<format>')
+def export_learning(learning_id, format):
+    """Export a learning resource in various formats"""
+    learning_resource = get_learning_by_id(learning_id)
+    
+    if not learning_resource:
+        flash("Learning resource not found")
+        return redirect(url_for("learning_index"))
+    
+    # Get categories for this learning resource
+    categories = get_all_learning_categories()
+    resource_categories = []
+    for category in categories:
+        if category["id"] in learning_resource["category_ids"]:
+            resource_categories.append(category["name"])
+    
+    # Create export content based on format
+    if format == 'pdf':
+        # Generate HTML content for PDF
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{learning_resource['title']}</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                h1 {{ color: #333; }}
+                .metadata {{ color: #666; margin-bottom: 20px; }}
+                .categories {{ margin: 10px 0; }}
+                .category {{ background: #f0f0f0; padding: 3px 8px; border-radius: 3px; margin-right: 5px; }}
+                .content {{ line-height: 1.6; }}
+                .difficulty {{ 
+                    display: inline-block;
+                    padding: 3px 8px;
+                    border-radius: 3px;
+                    color: white;
+                    background-color: {'#28a745' if learning_resource['difficulty'] == 'Easy' else '#ffc107' if learning_resource['difficulty'] == 'Medium' else '#dc3545'};
+                }}
+            </style>
+        </head>
+        <body>
+            <h1>{learning_resource['title']}</h1>
+            <div class="metadata">
+                <p>Difficulty: <span class="difficulty">{learning_resource['difficulty']}</span></p>
+                <p>Categories: {', '.join(resource_categories)}</p>
+                <p>Added: {learning_resource['date_added'].split('T')[0]}</p>
+                <p>Views: {learning_resource.get('views', 0)}</p>
+            </div>
+            <hr>
+            <div class="content">
+                {markdown.markdown(learning_resource['description'])}
+            </div>
+            <hr>
+            <p>Exported from CTF Resource Management on {datetime.now().strftime('%Y-%m-%d')}</p>
+        </body>
+        </html>
+        """
+        # Generate PDF using pdfkit
+        try:
+            pdf = pdfkit.from_string(html_content, False, configuration=pdfkit_config)
+            response = Response(pdf, mimetype="application/pdf")
+            response.headers["Content-Disposition"] = f"attachment; filename={learning_resource['title'].replace(' ', '_')}.pdf"
+            return response
+        except Exception as e:
+            app.logger.error(f"PDF generation error: {str(e)}")
+            flash("Could not generate PDF. Make sure wkhtmltopdf is installed.")
+            return redirect(url_for('view_learning', learning_id=learning_id))
+            
+    elif format == 'md':
+        # Create markdown content
+        markdown_content = f"""# {learning_resource['title']}
+
+**Difficulty:** {learning_resource['difficulty']}  
+**Categories:** {', '.join(resource_categories)}  
+**Added on:** {learning_resource['date_added'].split('T')[0]}  
+**Views:** {learning_resource.get('views', 0)}
+
+{learning_resource['description']}
+
+---
+*Exported from CTF Resource Management on {datetime.now().strftime('%Y-%m-%d')}*
+"""
+        response = Response(markdown_content, mimetype="text/markdown")
+        response.headers["Content-Disposition"] = f"attachment; filename={learning_resource['title'].replace(' ', '_')}.md"
+        return response
+        
+    elif format == 'html':
+        # Generate standalone HTML file
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{learning_resource['title']}</title>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }}
+                h1 {{ color: #333; }}
+                .metadata {{ color: #666; margin-bottom: 20px; }}
+                .categories {{ margin: 10px 0; }}
+                .category {{ background: #f0f0f0; padding: 3px 8px; border-radius: 3px; margin-right: 5px; display: inline-block; }}
+                .content {{ margin-top: 20px; }}
+                pre {{ background: #f8f8f8; padding: 10px; border-radius: 4px; overflow: auto; }}
+                code {{ font-family: monospace; }}
+                .difficulty {{ 
+                    display: inline-block;
+                    padding: 3px 8px;
+                    border-radius: 3px;
+                    color: white;
+                    background-color: {'#28a745' if learning_resource['difficulty'] == 'Easy' else '#ffc107' if learning_resource['difficulty'] == 'Medium' else '#dc3545'};
+                }}
+            </style>
+        </head>
+        <body>
+            <h1>{learning_resource['title']}</h1>
+            <div class="metadata">
+                <p>Difficulty: <span class="difficulty">{learning_resource['difficulty']}</span></p>
+                <p>Categories: {', '.join([f'<span class="category">{cat}</span>' for cat in resource_categories])}</p>
+                <p>Added: {learning_resource['date_added'].split('T')[0]}</p>
+                <p>Views: {learning_resource.get('views', 0)}</p>
+            </div>
+            <hr>
+            <div class="content">
+                {markdown.markdown(learning_resource['description'])}
+            </div>
+            <hr>
+            <p>Exported from CTF Resource Management on {datetime.now().strftime('%Y-%m-%d')}</p>
+        </body>
+        </html>
+        """
+        response = Response(html_content, mimetype="text/html")
+        response.headers["Content-Disposition"] = f"attachment; filename={learning_resource['title'].replace(' ', '_')}.html"
+        return response
+    
+    elif format == 'json':
+        # Export as JSON
+        export_data = {
+            "title": learning_resource['title'],
+            "difficulty": learning_resource['difficulty'],
+            "categories": resource_categories,
+            "description": learning_resource['description'],
+            "url": learning_resource.get('url', ''),
+            "date_added": learning_resource['date_added'],
+            "views": learning_resource.get('views', 0)
+        }
+        response = Response(json.dumps(export_data, indent=2), mimetype="application/json")
+        response.headers["Content-Disposition"] = f"attachment; filename={learning_resource['title'].replace(' ', '_')}.json"
+        return response
+    
+    else:
+        flash("Unsupported export format")
+        return redirect(url_for('view_learning', learning_id=learning_id))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

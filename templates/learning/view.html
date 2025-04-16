@@ -111,6 +111,46 @@
             </div>
         </div>
     </div>
+    
+    <div class="card mb-4 animate__animated animate__fadeInRight share-card" style="animation-delay: 0.2s">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-share-alt me-2"></i> Share & Export</h5>
+        </div>
+        <div class="card-body">
+            <div class="share-buttons">
+                <button class="btn btn-outline-primary share-btn" id="copyLinkBtn">
+                    <i class="fas fa-link"></i>
+                </button>
+                <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ learning.title|urlencode }}" target="_blank" class="btn btn-outline-info share-btn">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url|urlencode }}" target="_blank" class="btn btn-outline-primary share-btn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="mailto:?subject={{ learning.title|urlencode }}&body={{ request.url|urlencode }}" class="btn btn-outline-secondary share-btn">
+                    <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+            <!-- Export learning resource section -->
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="mb-3"><i class="fas fa-file-export me-2"></i> Export Resource</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('export_learning', learning_id=learning.id, format='pdf') }}" class="btn btn-sm btn-outline-danger">
+                        <i class="far fa-file-pdf me-1"></i> PDF
+                    </a>
+                    <a href="{{ url_for('export_learning', learning_id=learning.id, format='md') }}" class="btn btn-sm btn-outline-dark">
+                        <i class="fab fa-markdown me-1"></i> Markdown
+                    </a>
+                    <a href="{{ url_for('export_learning', learning_id=learning.id, format='html') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="far fa-file-code me-1"></i> HTML
+                    </a>
+                    <a href="{{ url_for('export_learning', learning_id=learning.id, format='json') }}" class="btn btn-sm btn-outline-info">
+                        <i class="far fa-file-code me-1"></i> JSON
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -185,6 +225,109 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast('Marked as not completed!', 'info');
         }
     });
+
+    // Copy link button
+    const copyLinkBtn = document.getElementById('copyLinkBtn');
+    
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', function() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url)
+                .then(() => {
+                    showToast('Link copied to clipboard!', 'success');
+                    
+                    // Add animation to the button
+                    this.classList.add('btn-success');
+                    this.querySelector('i').className = 'fas fa-check';
+                    
+                    // Reset button after a moment
+                    setTimeout(() => {
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-primary');
+                        this.querySelector('i').className = 'fas fa-link';
+                    }, 2000);
+                })
+                .catch(err => {
+                    showToast('Error copying link', 'error');
+                });
+        });
+    }
 });
 </script>
+
+<style>
+.learning-content {
+    line-height: 1.8;
+}
+
+.stats-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stats-circle i {
+    font-size: 1.2rem;
+}
+
+.stats-circle.bg-warning { background-color: var(--warning-color); }
+.stats-circle.bg-success { background-color: var(--success-color); }
+.stats-circle.bg-danger { background-color: var(--danger-color); }
+
+.resource-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-color);
+}
+
+.empty-state-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: rgba(59, 130, 246, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    margin: 0 auto;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.share-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.share-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+</style>
 {% endblock %}
