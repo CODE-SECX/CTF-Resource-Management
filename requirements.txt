@@ -1,12 +1,12 @@
-flask==2.2.3
+flask
 Flask-WTF==1.1.1
 python-dotenv==1.0.0
-markdown==3.4.1
+markdown
 Flask-Login==0.6.2
-werkzeug==2.2.3
+Werkzeug
 SQLAlchemy==2.0.20
 Flask-SQLAlchemy==3.0.5
 jsonschema==4.19.0
 PyJWT==2.8.0
 pdfkit==1.0.0
-html2text==2020.1.16
+html2text

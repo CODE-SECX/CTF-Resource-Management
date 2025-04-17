@@ -131,6 +131,24 @@
             "rating": 5.0,
             "ratings_count": 1,
             "views": 3
+        },
+        {
+            "id": 8,
+            "name": "Introduction",
+            "category": "codeguardian",
+            "tags": [
+                "overview",
+                "introduction"
+            ],
+            "url": "",
+            "description": "<h2>Overview</h2>\r\n<p>The CodeGuardian project represents a significant advancement in the field of software security, specifically focused on the detection and mitigation of vulnerabilities in source code through deep learning techniques. In today's rapidly evolving digital landscape, software vulnerabilities have become an increasingly critical concern for organizations of all sizes, as they can lead to serious security breaches, data leaks, and system compromises.</p>\r\n<p>CodeGuardian addresses this challenge by leveraging state-of-the-art deep learning models to automatically identify potential security vulnerabilities in source code during the development process. This proactive approach to security enables developers to detect and fix security issues early in the development lifecycle, significantly reducing the risk and cost associated with vulnerabilities discovered in production environments.</p>\r\n<p>The system utilizes a combination of natural language processing (NLP) techniques and specialized neural network architectures to analyze code patterns and structures that may indicate security weaknesses. By training on extensive datasets of both vulnerable and secure code examples, CodeGuardian can recognize subtle patterns and contextual clues that might escape traditional static analysis tools or human code reviewers.</p>\r\n<p>This dissertation explores the design, implementation, evaluation, and implications of the CodeGuardian system, presenting both theoretical foundations and practical applications of deep learning in code vulnerability detection. The research contributes to the growing field of AI-assisted secure coding practices and provides a framework for integrating automated security analysis into modern software development workflows.</p>",
+            "description_html": "<h2>Overview</h2>\r\n<p>The CodeGuardian project represents a significant advancement in the field of software security, specifically focused on the detection and mitigation of vulnerabilities in source code through deep learning techniques. In today's rapidly evolving digital landscape, software vulnerabilities have become an increasingly critical concern for organizations of all sizes, as they can lead to serious security breaches, data leaks, and system compromises.</p>\r\n<p>CodeGuardian addresses this challenge by leveraging state-of-the-art deep learning models to automatically identify potential security vulnerabilities in source code during the development process. This proactive approach to security enables developers to detect and fix security issues early in the development lifecycle, significantly reducing the risk and cost associated with vulnerabilities discovered in production environments.</p>\r\n<p>The system utilizes a combination of natural language processing (NLP) techniques and specialized neural network architectures to analyze code patterns and structures that may indicate security weaknesses. By training on extensive datasets of both vulnerable and secure code examples, CodeGuardian can recognize subtle patterns and contextual clues that might escape traditional static analysis tools or human code reviewers.</p>\r\n<p>This dissertation explores the design, implementation, evaluation, and implications of the CodeGuardian system, presenting both theoretical foundations and practical applications of deep learning in code vulnerability detection. The research contributes to the growing field of AI-assisted secure coding practices and provides a framework for integrating automated security analysis into modern software development workflows.</p>",
+            "file_path": null,
+            "date_added": "2025-04-17T10:35:41.915492",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0,
+            "views": 1
         }
     ],
     "users": [
@@ -189,6 +207,12 @@
             "name": "Cloud Security",
             "slug": "cloud-security",
             "icon": "fa-solid fa-cloud"
+        },
+        {
+            "id": 10,
+            "name": "codeguardian",
+            "slug": "codeguardian",
+            "icon": "fas fa-code"
         }
     ],
     "learning_resources": [

@@ -22,6 +22,7 @@ import uuid
 import notes
 import io
 import html2text
+import shutil
 
 # Configure pdfkit with path to wkhtmltopdf if available
 try:
@@ -68,6 +69,49 @@ app.config["JSON_FILE"] = "resources.json"
 app.config["UPLOAD_FOLDER"] = "static/uploads"
 app.config["ALLOWED_EXTENSIONS"] = {"pdf", "doc", "docx", "txt", "zip", "rar", "png", "jpg", "jpeg", "gif"}
 
+# Use /tmp directory for writable storage on Vercel
+if "VERCEL" in os.environ:
+    RESOURCES_FILE = "/tmp/resources.json"
+    NOTES_FILE = "/tmp/notes.json"
+    USERS_FILE = "/tmp/users.json"
+    
+    # Initialize files if they don't exist
+    def init_vercel_files():
+        if not os.path.exists(RESOURCES_FILE):
+            # Copy from the original file if it exists
+            if os.path.exists("resources.json"):
+                shutil.copy("resources.json", RESOURCES_FILE)
+            else:
+                # Create empty structure
+                with open(RESOURCES_FILE, 'w') as f:
+                    json.dump({"resources": [], "categories": [], "learning_resources": [], "learning_categories": []}, f)
+        
+        if not os.path.exists(NOTES_FILE):
+            # Copy from the original file if it exists
+            if os.path.exists("notes.json"):
+                shutil.copy("notes.json", NOTES_FILE)
+            else:
+                # Create empty notes structure
+                with open(NOTES_FILE, 'w') as f:
+                    json.dump({"notes": []}, f)
+                    
+        if not os.path.exists(USERS_FILE):
+            # Copy from the original file if it exists
+            if os.path.exists("users.json"):
+                shutil.copy("users.json", USERS_FILE)
+            else:
+                # Create empty users structure
+                with open(USERS_FILE, 'w') as f:
+                    json.dump({"users": []}, f)
+    
+    # Call this at startup
+    init_vercel_files()
+else:
+    # Original file paths for local development
+    RESOURCES_FILE = "resources.json"
+    NOTES_FILE = "notes.json"
+    USERS_FILE = "users.json"
+
 # Create uploads directory if it doesn't exist
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
@@ -96,15 +140,13 @@ def _jinja2_filter_parse_date(date_string):
 
 # Load resources from JSON file
 def load_resources():
-    if os.path.exists(app.config["JSON_FILE"]):
-        with open(app.config["JSON_FILE"], "r") as f:
-            return json.load(f)
-    return {"resources": []}
+    with open(RESOURCES_FILE, "r") as f:
+        return json.load(f)
 
 
 # Save resources to JSON file
 def save_resources(data):
-    with open(app.config["JSON_FILE"], "w") as f:
+    with open(RESOURCES_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
 
