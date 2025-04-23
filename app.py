@@ -1,9 +1,17 @@
-import os
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for,
+    flash,
+    session,
+    send_file,
+    Response,
+)
 import json
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, abort, send_file, Response
-
-# Import other modules
-# ...existing code...
+import os
 import sys
 from datetime import datetime
 import markdown
@@ -14,160 +22,54 @@ import uuid
 import notes
 import io
 import html2text
-import shutil
 
 # Configure pdfkit with path to wkhtmltopdf if available
 try:
     import pdfkit
-    # Check if we're on Vercel - PDF export won't work there
-    if "VERCEL" in os.environ:
-        pdfkit = None
-        pdfkit_config = None
-        print("Running on Vercel - PDF export disabled")
-    else:
-        # For local development, try to find wkhtmltopdf
-        if sys.platform.startswith('win'):
-            # Common install locations for wkhtmltopdf on Windows
-            potential_paths = [
-                r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',
-                r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe',
-                r'C:\wkhtmltopdf\bin\wkhtmltopdf.exe',
-                r'C:\wkhtmltopdf\wkhtmltopdf.exe',
-                r'C:\Program Files\wkhtmltopdf\wkhtmltopdf.exe',
-            ]
-            
-            # Try to find wkhtmltopdf executable
-            wkhtmltopdf_path = None
-            for path in potential_paths:
-                if os.path.exists(path):
-                    wkhtmltopdf_path = path
-                    print(f"Found wkhtmltopdf at: {path}")
-                    break
-            
-            # Configure pdfkit with the path if found
-            if wkhtmltopdf_path:
-                pdfkit_config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-            else:
-                print("wkhtmltopdf not found in common locations")
-                pdfkit_config = None
+    
+    # Check if we're on Windows
+    if sys.platform.startswith('win'):
+        # Common install locations for wkhtmltopdf on Windows
+        potential_paths = [
+            r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',
+            r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe',
+            r'C:\wkhtmltopdf\bin\wkhtmltopdf.exe',
+            r'C:\wkhtmltopdf\wkhtmltopdf.exe',
+            r'C:\Program Files\wkhtmltopdf\wkhtmltopdf.exe',
+        ]
+        
+        # Try to find wkhtmltopdf executable
+        wkhtmltopdf_path = None
+        for path in potential_paths:
+            print(f"Checking for wkhtmltopdf at: {path}")
+            if os.path.exists(path):
+                wkhtmltopdf_path = path
+                print(f"Found wkhtmltopdf at: {path}")
+                break
+        
+        # Configure pdfkit with the path if found
+        if wkhtmltopdf_path:
+            pdfkit_config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
         else:
-            # For Linux/Mac, let pdfkit find wkhtmltopdf in PATH
+            print("wkhtmltopdf not found in common locations")
             pdfkit_config = None
+    else:
+        # For Linux/Mac, let pdfkit find wkhtmltopdf in PATH
+        print("Non-Windows system, looking for wkhtmltopdf in PATH")
+        pdfkit_config = None
+        
 except ImportError:
     pdfkit = None
     pdfkit_config = None
-    print("pdfkit not available - PDF export disabled")
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key")
-
-# Simple file path configuration that works with Vercel
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Default empty data structures
-DEFAULT_RESOURCES = {
-    "resources": [], 
-    "categories": [
-        {"id": 1, "name": "Web Exploitation", "slug": "web", "icon": "fas fa-globe"},
-        {"id": 2, "name": "Cryptography", "slug": "crypto", "icon": "fas fa-key"},
-        {"id": 3, "name": "Reverse Engineering", "slug": "rev", "icon": "fas fa-microchip"},
-        {"id": 4, "name": "Binary Exploitation", "slug": "pwn", "icon": "fas fa-bug"},
-        {"id": 5, "name": "Forensics", "slug": "forensics", "icon": "fas fa-search"},
-        {"id": 6, "name": "Miscellaneous", "slug": "misc", "icon": "fas fa-puzzle-piece"}
-    ],
-    "learning_resources": [],
-    "learning_categories": [
-        {"id": 1, "name": "Introduction to CTF", "slug": "intro", "icon": "fas fa-flag"},
-        {"id": 2, "name": "Web Security", "slug": "web-security", "icon": "fas fa-spider"},
-        {"id": 3, "name": "Cryptography Basics", "slug": "crypto-basics", "icon": "fas fa-lock"},
-        {"id": 4, "name": "Binary Analysis", "slug": "binary", "icon": "fas fa-microchip"},
-        {"id": 5, "name": "Forensics Techniques", "slug": "forensics-tech", "icon": "fas fa-search"},
-        {"id": 6, "name": "OSINT", "slug": "osint", "icon": "fas fa-eye"}
-    ]
-}
-
-DEFAULT_NOTES = {"notes": []}
-DEFAULT_USERS = {"users": []}
-
-# File paths (using /tmp for writable storage on Vercel)
-RESOURCES_FILE = "/tmp/resources.json" if "VERCEL" in os.environ else os.path.join(BASE_DIR, "resources.json")
-NOTES_FILE = "/tmp/notes.json" if "VERCEL" in os.environ else os.path.join(BASE_DIR, "notes.json")
-USERS_FILE = "/tmp/users.json" if "VERCEL" in os.environ else os.path.join(BASE_DIR, "users.json")
-UPLOAD_FOLDER = "/tmp/uploads" if "VERCEL" in os.environ else os.path.join(BASE_DIR, "static/uploads")
-
-# Create uploads directory
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Update app config with the correct upload folder
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["SECRET_KEY"] = os.urandom(24)
+app.config["JSON_FILE"] = "resources.json"
+app.config["UPLOAD_FOLDER"] = "static/uploads"
 app.config["ALLOWED_EXTENSIONS"] = {"pdf", "doc", "docx", "txt", "zip", "rar", "png", "jpg", "jpeg", "gif"}
 
-# Simple file operations
-def load_resources():
-    """Load resources with fallback to defaults"""
-    try:
-        if os.path.exists(RESOURCES_FILE):
-            with open(RESOURCES_FILE, "r") as f:
-                return json.load(f)
-        # Initialize with defaults if file doesn't exist
-        with open(RESOURCES_FILE, "w") as f:
-            json.dump(DEFAULT_RESOURCES, f, indent=4)
-        return DEFAULT_RESOURCES
-    except:
-        # Return defaults on any error
-        return DEFAULT_RESOURCES
-
-def save_resources(data):
-    """Save resources to file"""
-    try:
-        with open(RESOURCES_FILE, "w") as f:
-            json.dump(data, f, indent=4)
-    except Exception as e:
-        print(f"Error saving resources: {e}")
-
-def load_notes():
-    """Load notes with fallback to defaults"""
-    try:
-        if os.path.exists(NOTES_FILE):
-            with open(NOTES_FILE, "r") as f:
-                return json.load(f)
-        # Initialize with defaults if file doesn't exist
-        with open(NOTES_FILE, "w") as f:
-            json.dump(DEFAULT_NOTES, f, indent=4)
-        return DEFAULT_NOTES
-    except:
-        # Return defaults on any error
-        return DEFAULT_NOTES
-
-def save_notes(data):
-    """Save notes to file"""
-    try:
-        with open(NOTES_FILE, "w") as f:
-            json.dump(data, f, indent=4)
-    except Exception as e:
-        print(f"Error saving notes: {e}")
-
-def load_users():
-    """Load users with fallback to defaults"""
-    try:
-        if os.path.exists(USERS_FILE):
-            with open(USERS_FILE, "r") as f:
-                return json.load(f)
-        # Initialize with defaults if file doesn't exist
-        with open(USERS_FILE, "w") as f:
-            json.dump(DEFAULT_USERS, f, indent=4)
-        return DEFAULT_USERS
-    except:
-        # Return defaults on any error
-        return DEFAULT_USERS
-
-def save_users(data):
-    """Save users to file"""
-    try:
-        with open(USERS_FILE, "w") as f:
-            json.dump(data, f, indent=4)
-    except Exception as e:
-        print(f"Error saving users: {e}")
+# Create uploads directory if it doesn't exist
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # Add custom filters for template rendering - REGISTER ALL FILTERS HERE BEFORE ROUTES
 @app.template_filter('datetime')
@@ -194,24 +96,15 @@ def _jinja2_filter_parse_date(date_string):
 
 # Load resources from JSON file
 def load_resources():
-    try:
-        with open(RESOURCES_FILE, "r") as f:
+    if os.path.exists(app.config["JSON_FILE"]):
+        with open(app.config["JSON_FILE"], "r") as f:
             return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        # Create default structure if file doesn't exist or is invalid
-        default_data = {
-            "resources": [], 
-            "categories": [], 
-            "learning_resources": [], 
-            "learning_categories": []
-        }
-        save_resources(default_data)
-        return default_data
+    return {"resources": []}
 
 
 # Save resources to JSON file
 def save_resources(data):
-    with open(RESOURCES_FILE, "w") as f:
+    with open(app.config["JSON_FILE"], "w") as f:
         json.dump(data, f, indent=4)
 
 
@@ -1125,11 +1018,6 @@ def export_resource(resource_id, format):
     
     # Create export content based on format
     if format == 'pdf':
-        # Check if PDF generation is available
-        if pdfkit is None:
-            flash("PDF export is not available in this environment. Try HTML or Markdown export instead.", "warning")
-            return redirect(url_for('resource_details', resource_id=resource_id))
-            
         # Generate HTML content for PDF
         html_content = f"""
         <!DOCTYPE html>
@@ -1173,7 +1061,7 @@ def export_resource(resource_id, format):
             return response
         except Exception as e:
             app.logger.error(f"PDF generation error: {str(e)}")
-            flash("Could not generate PDF. Please try another export format.")
+            flash("Could not generate PDF. Make sure wkhtmltopdf is installed.")
             return redirect(url_for('resource_details', resource_id=resource_id))
             
     elif format == 'md':
