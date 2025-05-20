@@ -187,6 +187,25 @@
             "rating": 0,
             "ratings_count": 0,
             "views": 1
+        },
+        {
+            "id": 11,
+            "name": "GitHub Commits Email Finder",
+            "category": "osint",
+            "tags": [
+                "osint",
+                "github",
+                "email finder"
+            ],
+            "url": "",
+            "description": "<p><a title=\"https://ghintel.secrets.ninja/\" href=\"https://ghintel.secrets.ninja/\" target=\"_blank\" rel=\"noopener\">https://ghintel.secrets.ninja/</a></p>\r\n<p>[COMMAND LINE]</p>\r\n<p><a title=\"https://github.com/SleepTheGod/GithubOSINT\" href=\"https://github.com/SleepTheGod/GithubOSINT\" target=\"_blank\" rel=\"noopener\">https://github.com/SleepTheGod/GithubOSINT</a></p>",
+            "description_html": "<p><a title=\"https://ghintel.secrets.ninja/\" href=\"https://ghintel.secrets.ninja/\" target=\"_blank\" rel=\"noopener\">https://ghintel.secrets.ninja/</a></p>\r\n<p>[COMMAND LINE]</p>\r\n<p><a title=\"https://github.com/SleepTheGod/GithubOSINT\" href=\"https://github.com/SleepTheGod/GithubOSINT\" target=\"_blank\" rel=\"noopener\">https://github.com/SleepTheGod/GithubOSINT</a></p>",
+            "file_path": null,
+            "date_added": "2025-05-20T10:31:12.654477",
+            "added_by": "Anonymous",
+            "rating": 0,
+            "ratings_count": 0,
+            "views": 2
         }
     ],
     "users": [
@@ -251,6 +270,12 @@
             "name": "LLM/AI",
             "slug": "llm",
             "icon": "fa-solid fa-brain"
+        },
+        {
+            "id": 11,
+            "name": "OSINT",
+            "slug": "osint",
+            "icon": "fa-brands fa-searchengin"
         }
     ],
     "learning_resources": [
